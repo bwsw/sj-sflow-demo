@@ -1,0 +1,59 @@
+{
+  "name": "sflow-csv-input",
+  "description": "Input engine for sflow",
+  "parallelism": 1,
+  "perTaskCores": 0.1,
+  "perTaskRam": 64,
+  "coordinationService": "zookeeper-sflow-service",
+  "performanceReportingInterval": 10000,
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 10,
+  "outputs": [
+    "sflow-avro",
+    "sflow-fallback"
+  ],
+  "lookupHistory": 100,
+  "queueMaxSize": 100,
+  "defaultEvictionPolicy": "NONE",
+  "evictionPolicy": "expanded-time",
+  "options": {
+    "line-separator": "\n",
+    "fields": [
+      "timestamp",
+      "name",
+      "agentAddress",
+      "inputPort",
+      "outputPort",
+      "srcMAC",
+      "dstMAC",
+      "ethernetType",
+      "inVlan",
+      "outVlan",
+      "srcIP",
+      "dstIP",
+      "ipProtocol",
+      "ipTos",
+      "ipTtl",
+      "udpSrcPort",
+      "udpDstPort",
+      "tcpFlags",
+      "packetSize",
+      "ipSize",
+      "samplingRate",
+      "srcAs",
+      "dstAs"
+    ],
+    "encoding": "UTF-8",
+    "output-stream": "sflow-avro",
+    "unique-key": [
+      "timestamp",
+      "name"
+    ],
+    "distribute": [
+      "timestamp",
+      "srcIP",
+      "dstIP"
+    ],
+    "fallback-stream": "sflow-fallback"
+  }
+}

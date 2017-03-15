@@ -17,23 +17,24 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
-    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT"
+    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT",
+    "org.apache.avro" % "avro" % "1.8.1"
   ),
 
-    assemblyMergeStrategy in assembly := {
-      case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
-      case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
-      case "log4j.properties" => MergeStrategy.concat
-      case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
-        oldStrategy(x)
-    },
+  assemblyMergeStrategy in assembly := {
+    case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
+    case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
+    case "log4j.properties" => MergeStrategy.concat
+    case x =>
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+  },
 
-    assemblyJarName in assembly := s"${name.value}-${version.value}.jar",
+  assemblyJarName in assembly := s"${name.value}-${version.value}.jar",
 
-    fork in run := true,
-    fork in Test := true,
-    parallelExecution in Test := false
+  fork in run := true,
+  fork in Test := true,
+  parallelExecution in Test := false
 )
 
 lazy val sflowDemoInput = Project(id = "sflow-input",

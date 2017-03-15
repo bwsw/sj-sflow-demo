@@ -1,0 +1,15 @@
+{
+  "name": "sflow-fallback",
+  "description": "Tstream for fallback in sflow demo",
+  "service": "tstream-sflow-service",
+  "tags": [
+    "sflow",
+    "input",
+    "fallback"
+  ],
+  "type": "stream.t-stream",
+  "partitions": 3,
+  "generator": {
+    "generatorType": "local"
+  }
+}

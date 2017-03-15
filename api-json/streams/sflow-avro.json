@@ -1,0 +1,15 @@
+{
+  "name": "sflow-avro",
+  "description": "Tstream for normal input in sflow demo",
+  "service": "tstream-sflow-service",
+  "tags": [
+    "sflow",
+    "input",
+    "avro"
+  ],
+  "type": "stream.t-stream",
+  "partitions": 3,
+  "generator": {
+    "generatorType": "local"
+  }
+}
