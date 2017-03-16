@@ -39,9 +39,7 @@
       "tcpFlags",
       "packetSize",
       "ipSize",
-      "samplingRate",
-      "srcAs",
-      "dstAs"
+      "samplingRate"
     ],
     "encoding": "UTF-8",
     "output-stream": "sflow-avro",

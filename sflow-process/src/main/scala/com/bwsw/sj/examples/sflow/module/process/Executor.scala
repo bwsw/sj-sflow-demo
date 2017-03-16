@@ -20,6 +20,8 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
 
     val envelopes = allWindows.flatMap(_._2.batches).flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Record]])
     val sflowRecords = envelopes.flatMap(_.data.map { avroRecord =>
+      val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[String]
+      val _dstIP = avroRecord.get(FieldsNames.dstIP).asInstanceOf[String]
       new SflowRecord(
         timestamp = avroRecord.get(FieldsNames.timestamp).asInstanceOf[String].toLong,
         name = avroRecord.get(FieldsNames.name).asInstanceOf[String],
@@ -31,8 +33,8 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
         ethernetType = avroRecord.get(FieldsNames.ethernetType).asInstanceOf[String],
         inVlan = avroRecord.get(FieldsNames.inVlan).asInstanceOf[String].toInt,
         outVlan = avroRecord.get(FieldsNames.outVlan).asInstanceOf[String].toInt,
-        srcIP = GeoIp.resolveAs(avroRecord.get(FieldsNames.srcIP).asInstanceOf[String]).toString,
-        dstIP = GeoIp.resolveAs(avroRecord.get(FieldsNames.dstIP).asInstanceOf[String]).toString,
+        srcIP = _srcIP,
+        dstIP = _dstIP,
         ipProtocol = avroRecord.get(FieldsNames.ipProtocol).asInstanceOf[String].toInt,
         ipTos = avroRecord.get(FieldsNames.ipTos).asInstanceOf[String],
         ipTtl = avroRecord.get(FieldsNames.ipTtl).asInstanceOf[String].toInt,
@@ -42,8 +44,8 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
         packetSize = avroRecord.get(FieldsNames.packetSize).asInstanceOf[String].toInt,
         ipSize = avroRecord.get(FieldsNames.ipSize).asInstanceOf[String].toInt,
         samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[String].toInt,
-        srcAs = avroRecord.get(FieldsNames.srcAs).asInstanceOf[String].toInt,
-        dstAs = avroRecord.get(FieldsNames.dstAs).asInstanceOf[String].toInt)
+        srcAs = GeoIp.resolveAs(_srcIP),
+        dstAs = GeoIp.resolveAs(_dstIP))
     })
 
     storage ++= sflowRecords
@@ -95,6 +97,4 @@ object FieldsNames {
   val packetSize = "packetSize"
   val ipSize = "ipSize"
   val samplingRate = "samplingRate"
-  val srcAs = "srcAs"
-  val dstAs = "dstAs"
 }
