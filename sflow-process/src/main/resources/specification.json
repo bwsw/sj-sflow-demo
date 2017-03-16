@@ -28,5 +28,6 @@
   "options": {
   },
   "validator-class": "com.bwsw.sj.examples.sflow.module.process.Validator",
-  "executor-class": "com.bwsw.sj.examples.sflow.module.process.Executor"
+  "executor-class": "com.bwsw.sj.examples.sflow.module.process.Executor",
+  "batch-collector-class": "com.bwsw.sj.examples.sflow.module.process.SflowBatchCollector"
 }
