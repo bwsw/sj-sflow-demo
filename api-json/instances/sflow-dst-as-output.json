@@ -1,10 +1,10 @@
 {
   "name" : "sflow-dst-as-output",
   "description" : "Output module for sflow example",
-  "input" : "DstAsStream",
-  "output" : "DstAsData",
+  "input" : "dstasstream",
+  "output" : "dstasdata",
   "checkpointMode" : "every-nth" ,
-  "checkpointInterval" : 1000,
+  "checkpointInterval" : 3,
   "parallelism" : 1,
   "startFrom" : "oldest",
   "perTaskCores" : 0.1,

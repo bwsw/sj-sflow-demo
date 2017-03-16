@@ -1,5 +1,5 @@
 {
-  "name": "SrcDstData",
+  "name": "srcdstdata",
   "description": "JDBC stream for demo",
   "service": "jdbc-sflow-service",
   "tags": [

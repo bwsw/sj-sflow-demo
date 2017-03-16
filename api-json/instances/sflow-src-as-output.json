@@ -1,10 +1,10 @@
 {
   "name" : "sflow-src-as-output",
   "description" : "Output module for sflow example",
-  "input" : "SrcAsStream",
-  "output" : "SrcAsData",
+  "input" : "srcasstream",
+  "output" : "srcasdata",
   "checkpointMode" : "every-nth" ,
-  "checkpointInterval" : 1000,
+  "checkpointInterval" : 3,
   "parallelism" : 1,
   "startFrom" : "oldest",
   "perTaskCores" : 0.1,

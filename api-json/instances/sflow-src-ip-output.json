@@ -1,10 +1,10 @@
 {
   "name" : "sflow-src-ip-output",
   "description" : "Output module for sflow example",
-  "input" : "SrcIpStream",
-  "output" : "SrcIpData",
+  "input" : "srcipstream",
+  "output" : "srcipdata",
   "checkpointMode" : "every-nth" ,
-  "checkpointInterval" : 1000,
+  "checkpointInterval" : 3,
   "parallelism" : 1,
   "startFrom" : "oldest",
   "perTaskCores" : 0.1,

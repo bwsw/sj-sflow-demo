@@ -1,22 +1,17 @@
 {
   "name": "sflow-process",
   "description": "Windowed module for sflow example",
-  "window": "1",
-  "slidingInterval": "1",
-  "mainStream": "sflow",
-  "batchFillType": {
-    "typeName": "time-interval",
-    "value": "300000"
-  },
+  "window": 1,
+  "slidingInterval": 1,
   "inputs": [
     "sflow-avro"
   ],
   "outputs": [
-    "SrcAsStream",
-    "DstAsStream",
-    "SrcIpStream",
-    "DstIpStream",
-    "SrcDstStream"
+    "srcasstream",
+    "dstasstream",
+    "srcipstream",
+    "dstipstream",
+    "srcdststream"
   ],
   "stateManagement": "ram",
   "stateFullCheckpoint": 5,

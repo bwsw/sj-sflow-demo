@@ -1,5 +1,5 @@
 {
-  "name": "SrcIpData",
+  "name": "srcipdata",
   "description": "JDBC stream for demo",
   "service": "jdbc-sflow-service",
   "tags": [

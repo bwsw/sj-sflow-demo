@@ -1,5 +1,5 @@
 {
-  "name": "SrcAsStream",
+  "name": "srcasstream",
   "description": "Tstream for demo",
   "service": "tstream-sflow-service",
   "tags": [

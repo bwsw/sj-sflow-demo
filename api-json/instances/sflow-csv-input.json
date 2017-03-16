@@ -7,7 +7,7 @@
   "coordinationService": "zookeeper-sflow-service",
   "performanceReportingInterval": 10000,
   "checkpointMode": "every-nth",
-  "checkpointInterval": 10,
+  "checkpointInterval": 3,
   "outputs": [
     "sflow-avro",
     "sflow-fallback"

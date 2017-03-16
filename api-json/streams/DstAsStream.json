@@ -1,5 +1,5 @@
 {
-  "name": "DstAsStream",
+  "name": "dstasstream",
   "description": "Tstream for demo",
   "service": "tstream-sflow-service",
   "tags": [
