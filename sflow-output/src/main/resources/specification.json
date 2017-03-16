@@ -1,5 +1,5 @@
 {
-  "name": "com.bwsw.stub.output-bench-test-jdbc",
+  "name": "sflow-output",
   "description": "Stub output-module by BW",
   "version": "1.0",
   "author": "Kseniya Tomskikh",
@@ -28,7 +28,7 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutorJdbc",
+  "validator-class": "com.bwsw.sj.examples.sflow.module.output.Validator",
+  "executor-class": "com.bwsw.sj.examples.sflow.module.output.Executor",
   "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
 }
