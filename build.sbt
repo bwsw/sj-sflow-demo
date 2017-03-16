@@ -37,10 +37,6 @@ val commonSettings = Seq(
   parallelExecution in Test := false
 )
 
-lazy val sflowDemoInput = Project(id = "sflow-input",
-  base = file("./sflow-input"))
-  .settings(commonSettings: _*)
-
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
   .settings(commonSettings: _*)
