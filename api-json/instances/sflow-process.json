@@ -2,10 +2,10 @@
   "name": "sflow-process",
   "description": "Windowed module for sflow example",
   "window": "1",
-  "sliding-interval": "1",
-  "main-stream": "sflow",
-  "batch-fill-type": {
-    "type-name": "time-interval",
+  "slidingInterval": "1",
+  "mainStream": "sflow",
+  "batchFillType": {
+    "typeName": "time-interval",
     "value": "300000"
   },
   "inputs": [
@@ -18,12 +18,12 @@
     "DstIpStream",
     "SrcDstStream"
   ],
-  "state-management": "ram",
-  "state-full-checkpoint": 5,
+  "stateManagement": "ram",
+  "stateFullCheckpoint": 5,
   "parallelism": 1,
-  "start-from": "oldest",
-  "per-task-cores": 0.1,
-  "per-task-ram": 64,
-  "event-wait-time": 10,
-  "coordination-service": "zookeeper-sflow-service"
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 64,
+  "eventWaitTime": 10,
+  "coordinationService": "zookeeper-sflow-service"
 }

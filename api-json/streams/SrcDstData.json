@@ -7,5 +7,5 @@
     "output"
   ],
   "primary": "id",
-  "stream-type": "jdbc-output"
+  "type": "jdbc-output"
 }
