@@ -7,6 +7,7 @@
 - [Installation](#installation)
 - [Preparation](#preparation)
     * [Providers creation](#providers-creation)
+    * [Output SQL tables creation](#output-sql-tables-creation)
     * [Services creation](#services-creation)
     * [Streams creation](#streams-creation)
     * [Instances creation](#instances-creation)
@@ -49,6 +50,50 @@ To create providers
 $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/cassandra-sflow-provider.json" 
 $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/jdbc-sflow-provider.json" 
 $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-sflow-provider.json" 
+```
+
+
+### Output SQL tables creation
+
+SQL tables for output must be created in database *sflow*. To create tables
+
+```postgres-sql
+CREATE TABLE SrcIpData (
+    id VARCHAR(255) PRIMARY KEY,
+    src_ip VARCHAR(255),
+    traffic INT,
+    txn VARCHAR(255)
+);
+
+CREATE TABLE SrcDstData (
+    id VARCHAR(255) PRIMARY KEY,
+    src_as INT,
+    dst_as INT,
+    traffic INT,
+    txn VARCHAR(255)
+);
+
+CREATE TABLE SrcAsData (
+    id VARCHAR(255) PRIMARY KEY,
+    src_as INT,
+    traffic INT,
+    txn VARCHAR(255)
+);
+
+CREATE TABLE DstIpData (
+    id VARCHAR(255) PRIMARY KEY,
+    dst_ip VARCHAR(255),
+    traffic INT,
+    txn VARCHAR(255)
+);
+
+CREATE TABLE DstAsData (
+    id VARCHAR(255) PRIMARY KEY,
+    dst_as INT,
+    traffic INT,
+    id VARCHAR(255),
+    txn VARCHAR(255)
+);
 ```
 
 
@@ -145,6 +190,5 @@ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1
 $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-ip-output/start"
 ```
  
-[TODO]: <> (SQL tables creation)
 [TODO]: <> (Describe streams)
 [TODO]: <> (Launch example)
