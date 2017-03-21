@@ -2,9 +2,9 @@
   "name": "jdbc-sflow-provider",
   "description": "JDBC provider for demo",
   "type": "JDBC",
-  "login": "admin",
-  "password": "admin",
+  "login": "<login>",
+  "password": "<password>",
   "hosts": [
-    "176.120.25.19:5432"
+    "<host>:<port>"
   ]
 }

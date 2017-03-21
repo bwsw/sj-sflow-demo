@@ -2,7 +2,9 @@
   "name": "zookeeper-sflow-provider",
   "description": "Zookeeper provider for demo",
   "type": "zookeeper",
+  "login": "<login>",
+  "password": "<password>",
   "hosts": [
-    "zookeeper-2181.service.consul:2181"
+    "<host>:<port>"
   ]
 }
