@@ -52,4 +52,45 @@ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: applicati
 
 ### Services creation
 
+To create services
+
+```bash
+$ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/cassandra-sflow-service.json"
+$ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/jdbc-sflow-service.json"
+$ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-sflow-service.json"
+$ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-sflow-service.json"
+```
+
 ### Streams creation
+
+To create an output streams of input module
+```bash
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-avro.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-fallback.json"
+```
+
+- *sflow-avro* &mdash; stream for correctly parsed sflow records;
+- *sflow-fallback* &mdash; stream for incorrect inputs.
+
+To create an output streams of process module
+
+```bash
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/DstAsData.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/DstIpData.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcAsData.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcDstData.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcIpData.json"
+```
+
+To create an output streams of output module
+
+```bash
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/DstAsStream.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/DstIpStream.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcAsStream.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcDstStream.json"
+$ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcIpStream.json"
+```
+ 
+[TODO]: <> (SQL tables creation)
+[TODO]: <> (Describe streams)
