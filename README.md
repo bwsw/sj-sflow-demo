@@ -10,6 +10,7 @@
     * [Services creation](#services-creation)
     * [Streams creation](#streams-creation)
     * [Instances creation](#instances-creation)
+- [Launching](#launching)
 
 
 ## Prerequisites
@@ -117,6 +118,33 @@ $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/
 $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
 $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
 ```
+
+
+## Launching
+
+Now you can launch every module.
+
+To launch input module
+
+```bash
+$ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/start"
+```
+
+To launch process module
+```bash
+$ curl --request GET "http://$address/v1/modules/windowed-streaming/sflow-process/1.0/instance/sflow-process/start"
+```
+
+To launch output module
+
+```bash
+$ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-dst-as-output/start"
+$ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-dst-ip-output/start"
+$ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-as-output/start"
+$ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-dst-output/start"
+$ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-ip-output/start"
+```
  
 [TODO]: <> (SQL tables creation)
 [TODO]: <> (Describe streams)
+[TODO]: <> (Launch example)
