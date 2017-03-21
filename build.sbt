@@ -7,6 +7,7 @@ scalaVersion := "2.12.1"
 addCommandAlias("rebuild", ";clean; compile; package")
 
 val commonSettings = Seq(
+  version := "1.0",
   scalaVersion := "2.12.1",
   scalacOptions ++= Seq(
     "-unchecked",
