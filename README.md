@@ -9,6 +9,7 @@
     * [Providers creation](#providers-creation)
     * [Services creation](#services-creation)
     * [Streams creation](#streams-creation)
+    * [Instances creation](#instances-creation)
 
 
 ## Prerequisites
@@ -90,6 +91,31 @@ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application
 $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcAsStream.json"
 $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcDstStream.json"
 $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/SrcIpStream.json"
+```
+
+
+### Instances creation
+
+To create an instance of input module
+
+```bash
+$ curl --request POST "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-csv-input.json" 
+```
+
+To create an instance of process module
+
+```bash
+$ curl --request POST "http://$address/v1/modules/windowed-streaming/sflow-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-process.json" 
+```
+
+To create an instances of output module
+
+```bash
+$ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-dst-as-output.json"
+$ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-dst-ip-output.json"
+$ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-as-output.json"
+$ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
+$ curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
 ```
  
 [TODO]: <> (SQL tables creation)
