@@ -1,10 +1,11 @@
 package com.bwsw.sj.examples.sflow.module.process
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.utils.{GeoIp, SflowRecord}
+import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
+import com.bwsw.sj.examples.sflow.common.SflowRecord
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
 import org.apache.avro.generic.GenericData.Record
 
@@ -22,7 +23,7 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     val sflowRecords = envelopes.flatMap(_.data.map { avroRecord =>
       val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[String]
       val _dstIP = avroRecord.get(FieldsNames.dstIP).asInstanceOf[String]
-      new SflowRecord(
+      SflowRecord(
         timestamp = avroRecord.get(FieldsNames.timestamp).asInstanceOf[String].toLong,
         name = avroRecord.get(FieldsNames.name).asInstanceOf[String],
         agentAddress = avroRecord.get(FieldsNames.agentAddress).asInstanceOf[String],

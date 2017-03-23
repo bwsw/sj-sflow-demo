@@ -1,10 +1,10 @@
 package com.bwsw.sj.examples.sflow.module.process.mapreduce
 
-import com.bwsw.sj.common.utils.SflowRecord
+import com.bwsw.sj.examples.sflow.common.SflowRecord
+import com.bwsw.sj.examples.sflow.module.process.mapreduce.mappers._
 import com.hazelcast.config._
 import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
-import com.hazelcast.mapreduce.{JobTracker, KeyValueSource, Job}
-import com.bwsw.sj.examples.sflow.module.process.mapreduce.mappers._
+import com.hazelcast.mapreduce.{JobTracker, KeyValueSource}
 
 import scala.collection.JavaConverters._
 
