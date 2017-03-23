@@ -57,7 +57,7 @@ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: applicati
 
 SQL tables for output must be created in database *sflow*. To create tables
 
-```postgres-sql
+```sql
 CREATE TABLE SrcIpData (
     id VARCHAR(255) PRIMARY KEY,
     src_ip VARCHAR(255),
@@ -189,6 +189,34 @@ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1
 $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-dst-output/start"
 $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-src-ip-output/start"
 ```
- 
+
+To get a list of listening ports of input module
+
+```bash
+$ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
+```
+
+and look at field named tasks, e.g. it will look like
+
+```json
+"tasks": {
+  "sflow-csv-input-task0": {
+    "host": "176.120.25.19",
+    "port": 31000
+  },
+  "sflow-csv-input-task1": {
+    "host": "176.120.25.19",
+    "port": 31004
+  }
+}
+```
+
+And now you can start the flow
+
+```bash
+$ for line in $(cat sflow_example.csv); do echo $line | nc 176.120.25.19 31000 ; sleep 1; done
+```
+
+Results you can see in output database.
+
 [TODO]: <> (Describe streams)
-[TODO]: <> (Launch example)
