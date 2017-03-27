@@ -23,4 +23,7 @@ case class SflowRecord(
     ipSize: Int,
     samplingRate: Int,
     var srcAs: Int = 0,
-    var dstAs: Int = 0)
+    var dstAs: Int = 0) {
+
+  def getTraffic = packetSize * samplingRate
+}
