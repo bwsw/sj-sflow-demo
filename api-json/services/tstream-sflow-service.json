@@ -7,5 +7,5 @@
   "dataProvider": "cassandra-sflow-provider",
   "dataNamespace": "sflow",
   "lockProvider": "zookeeper-sflow-provider",
-  "lockNamespace": "unit"
+  "lockNamespace": "sflow"
 }
