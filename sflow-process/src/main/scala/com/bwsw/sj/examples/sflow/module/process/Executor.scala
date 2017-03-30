@@ -1,5 +1,6 @@
 package com.bwsw.sj.examples.sflow.module.process
 
+import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
@@ -53,9 +54,13 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
           tcpFlags = avroRecord.get(FieldsNames.tcpFlags).asInstanceOf[Utf8].toString,
           packetSize = avroRecord.get(FieldsNames.packetSize).asInstanceOf[Utf8].toString.toInt,
           ipSize = avroRecord.get(FieldsNames.ipSize).asInstanceOf[Utf8].toString.toInt,
-          samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[Utf8].toString.toInt)
+          samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[Utf8].toString.toInt,
+          srcAs = GeoIp.resolveAs(_srcIP),
+          dstAs = GeoIp.resolveAs(_dstIP))
       } catch {
-        case _: Throwable => null
+        case e: Throwable =>
+          println(e.getMessage)
+          null
       }
     }).filter(_ != null)
 
