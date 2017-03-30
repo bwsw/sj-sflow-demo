@@ -1,18 +1,16 @@
 package com.bwsw.sj.examples.sflow.module.output
 
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
+import com.bwsw.sj.engine.core.output.types.jdbc.{JavaStringField, JdbcEntityBuilder}
+import com.bwsw.sj.examples.sflow.common._
 import com.bwsw.sj.examples.sflow.module.output.data._
 
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
-class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
-  val jsonSerializer = new JsonSerializer()
-  val objectSerializer = new ObjectSerializer()
+class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[SrcDstAs](manager) {
 
   /**
     * Transform t-stream transaction to output entities
@@ -20,37 +18,18 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     * @param envelope Input T-Stream envelope
     * @return List of output envelopes
     */
-  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
-    val list:List[Envelope] = List[Envelope]()
-    envelope.data.foreach { row =>
-      val value = objectSerializer.deserialize(row)
-      envelope.stream match {
-        case "SrcAsStream" =>
-          val defValue = value.asInstanceOf[collection.mutable.Map[Int, Int]]
-          list ::: defValue.map(pair => new SrcAsData(pair._1, pair._2)).toList
-        case "DstAsStream" =>
-          val defValue = value.asInstanceOf[collection.mutable.Map[Int, Int]]
-          list ::: defValue.map(pair => new DstAsData(pair._1, pair._2)).toList
-        case "SrcDstStream" =>
-          val defValue = value.asInstanceOf[collection.mutable.Map[Int Tuple2 Int, Int]]
-          list ::: defValue.map(pair => new SrcDstData(pair._1._1, pair._1._2, pair._2)).toList
-        case "SrcIpStream" =>
-          val defValue = value.asInstanceOf[collection.mutable.Map[String, Int]]
-          list ::: defValue.map(pair => new SrcIpData(pair._1, pair._2)).toList
-        case "DstIpStream" =>
-          val defValue = value.asInstanceOf[collection.mutable.Map[String, Int]]
-          list ::: defValue.map(pair => new DstIpData(pair._1, pair._2)).toList
-      }
+  override def onMessage(envelope: TStreamEnvelope[SrcDstAs]) = {
+    envelope.data.map { srcDstAs =>
+      new SrcDstData(srcDstAs.srcAs, srcDstAs.dstAs, srcDstAs.traffic)
     }
-    list
   }
 
-  override def getOutputModule = {
-    val entityBuilder = new ElasticsearchEntityBuilder[String]()
-    val entity = entityBuilder
-      .field(new IntegerField("id", 10))
-      .field(new JavaStringField("name", "someString"))
+  override def getOutputEntity = {
+    new JdbcEntityBuilder()
+      .field(new JavaStringField("id"))
+      .field(new JavaStringField("src_as"))
+      .field(new JavaStringField("dst_as"))
+      .field(new JavaStringField("traffic"))
       .build()
-    entity
   }
 }

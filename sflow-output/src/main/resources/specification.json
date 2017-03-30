@@ -25,10 +25,7 @@
   "module-type": "output-streaming",
   "engine-name": "com.bwsw.output.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-    "opt": 1
-  },
   "validator-class": "com.bwsw.sj.examples.sflow.module.output.Validator",
   "executor-class": "com.bwsw.sj.examples.sflow.module.output.Executor",
-  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
+  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.data.SrcDstData"
 }
