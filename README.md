@@ -58,40 +58,45 @@ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: applicati
 SQL tables for output must be created in database *sflow*. To create tables
 
 ```sql
-CREATE TABLE SrcIpData (
+CREATE TABLE dstasdata (
     id VARCHAR(255) PRIMARY KEY,
-    src_ip VARCHAR(255),
-    traffic INT,
+    dst_as INTEGER,
+    traffic INTEGER,
     txn VARCHAR(255)
 );
 
-CREATE TABLE SrcDstData (
+CREATE TABLE dstipdata (
     id VARCHAR(255) PRIMARY KEY,
-    src_as INT,
-    dst_as INT,
-    traffic INT,
+    dst_ip VARCHAR(32),
+    traffic INTEGER,
     txn VARCHAR(255)
 );
 
-CREATE TABLE SrcAsData (
+CREATE TABLE srcasdata (
     id VARCHAR(255) PRIMARY KEY,
-    src_as INT,
-    traffic INT,
+    src_as INTEGER,
+    traffic INTEGER,
     txn VARCHAR(255)
 );
 
-CREATE TABLE DstIpData (
+CREATE TABLE srcdstdata (
     id VARCHAR(255) PRIMARY KEY,
-    dst_ip VARCHAR(255),
-    traffic INT,
+    src_as INTEGER,
+    dst_as INTEGER,
+    traffic INTEGER,
     txn VARCHAR(255)
 );
 
-CREATE TABLE DstAsData (
+CREATE TABLE srcipdata (
     id VARCHAR(255) PRIMARY KEY,
-    dst_as INT,
-    traffic INT,
-    id VARCHAR(255),
+    src_ip VARCHAR(32),
+    traffic INTEGER,
+    txn VARCHAR(255)
+);
+
+CREATE TABLE fallbackdata (
+    id VARCHAR(255) PRIMARY KEY,
+    line VARCHAR(255),
     txn VARCHAR(255)
 );
 ```
