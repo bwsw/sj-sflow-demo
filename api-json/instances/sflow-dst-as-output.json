@@ -1,13 +1,19 @@
 {
-  "name" : "sflow-dst-as-output",
-  "description" : "Output module for sflow example",
-  "input" : "dstasstream",
-  "output" : "dstasdata",
-  "checkpointMode" : "every-nth" ,
-  "checkpointInterval" : 3,
-  "parallelism" : 1,
-  "startFrom" : "oldest",
-  "perTaskCores" : 0.1,
-  "perTaskRam" : 64,
-  "coordinationService" : "zookeeper-sflow-service"
+  "name": "sflow-dst-as-output",
+  "description": "Output module for sflow example",
+  "input": "dstasstream",
+  "output": "dstasdata",
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 3,
+  "parallelism": 1,
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 192,
+  "jvmOptions": {
+    "-Xmx": "32m",
+    "-Xms": "16m",
+    "-XX:MaxDirectMemorySize=": "4m",
+    "-XX:MaxMetaspaceSize=": "64m"
+  },
+  "coordinationService": "zookeeper-sflow-service"
 }
