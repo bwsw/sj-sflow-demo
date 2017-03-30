@@ -50,3 +50,7 @@ lazy val sflowDemoOutput = Project(id = "sflow-output",
   base = file("./sflow-output"))
   .dependsOn(sflowDemoCommon)
   .settings(commonSettings: _*)
+
+lazy val sflowDemoFallbackOutput = Project(id = "sflow-fallback-output",
+  base = file("./sflow-fallback-output"))
+  .settings(commonSettings: _*)
