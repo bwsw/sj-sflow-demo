@@ -3,6 +3,6 @@
   "description": "JDBC service for demo",
   "provider": "jdbc-sflow-provider",
   "database": "sflow",
-  "driver": "postgresql",
+  "driver": "mysql",
   "type": "JDBC"
 }
