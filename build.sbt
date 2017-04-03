@@ -17,8 +17,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
-    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT",
-    "org.apache.avro" % "avro" % "1.8.1"
+    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT"
   ),
 
   assemblyMergeStrategy in assembly := {
