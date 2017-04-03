@@ -4,6 +4,7 @@ import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{JavaStringField, JdbcEntityBuilder}
+import com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.util.Utf8
 
@@ -15,7 +16,6 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
   override def onMessage(envelope: TStreamEnvelope[GenericRecord]) = {
     envelope.data.map { record =>
       val line = record.get("data").asInstanceOf[Utf8].toString
-      println(s"\t$line")
       new Fallback(line)
     }
   }

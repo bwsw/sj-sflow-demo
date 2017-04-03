@@ -27,5 +27,5 @@
   "engine-version": "1.0",
   "validator-class": "com.bwsw.sj.examples.sflow.module.output.fallback.Validator",
   "executor-class": "com.bwsw.sj.examples.sflow.module.output.fallback.Executor",
-  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.fallback.Fallback"
+  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback"
 }

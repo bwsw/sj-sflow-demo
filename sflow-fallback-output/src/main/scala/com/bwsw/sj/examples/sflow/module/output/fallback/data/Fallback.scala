@@ -1,4 +1,4 @@
-package com.bwsw.sj.examples.sflow.module.output.fallback
+package com.bwsw.sj.examples.sflow.module.output.fallback.data
 
 import com.bwsw.sj.engine.core.entities.OutputEnvelope
 
