@@ -1,8 +1,8 @@
 {
-  "name": "sflow-output",
-  "description": "Stub output-module by BW",
+  "name": "sflow-fallback-output",
+  "description": "Output module for fallback",
   "version": "1.0",
-  "author": "Kseniya Tomskikh",
+  "author": "Pavel Tomskikh",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -25,7 +25,7 @@
   "module-type": "output-streaming",
   "engine-name": "com.bwsw.output.streaming.engine",
   "engine-version": "1.0",
-  "validator-class": "com.bwsw.sj.examples.sflow.module.output.Validator",
-  "executor-class": "com.bwsw.sj.examples.sflow.module.output.Executor",
-  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.data.OutputData"
+  "validator-class": "com.bwsw.sj.examples.sflow.module.output.fallback.Validator",
+  "executor-class": "com.bwsw.sj.examples.sflow.module.output.fallback.Executor",
+  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback"
 }

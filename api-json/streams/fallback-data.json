@@ -1,0 +1,12 @@
+{
+  "name": "fallbackdata",
+  "description": "JDBC stream for demo",
+  "service": "jdbc-sflow-service",
+  "tags": [
+    "sflow",
+    "output",
+    "fallback"
+  ],
+  "primary": "id",
+  "type": "jdbc-output"
+}

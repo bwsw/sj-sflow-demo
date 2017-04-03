@@ -1,24 +1,52 @@
 {
   "name": "sflow-process",
-  "description": "Windowed module for sflow example",
-  "window": 1,
+  "description": "Batch module for sflow example",
+  "window": 3,
   "slidingInterval": 1,
   "inputs": [
     "sflow-avro"
   ],
   "outputs": [
-    "srcasstream",
-    "dstasstream",
-    "srcipstream",
-    "dstipstream",
-    "srcdststream"
+    "output-stream"
   ],
   "stateManagement": "ram",
   "stateFullCheckpoint": 5,
   "parallelism": 1,
   "startFrom": "oldest",
   "perTaskCores": 0.1,
-  "perTaskRam": 64,
-  "eventWaitTime": 10,
-  "coordinationService": "zookeeper-sflow-service"
+  "perTaskRam": 192,
+  "jvmOptions": {
+    "-Xmx": "32m",
+    "-XX:MaxDirectMemorySize=": "4m",
+    "-XX:MaxMetaspaceSize=": "64m"
+  },
+  "eventWaitTime": 1000,
+  "coordinationService": "zookeeper-sflow-service",
+  "inputAvroSchema": {
+    "type": "record",
+    "name": "csv",
+    "fields": [
+      {"name": "timestamp", "type": "string"},
+      {"name": "name", "type": "string"},
+      {"name": "agentAddress", "type": "string"},
+      {"name": "inputPort", "type": "string"},
+      {"name": "outputPort", "type": "string"},
+      {"name": "srcMAC", "type": "string"},
+      {"name": "dstMAC", "type": "string"},
+      {"name": "ethernetType", "type": "string"},
+      {"name": "inVlan", "type": "string"},
+      {"name": "outVlan", "type": "string"},
+      {"name": "srcIP", "type": "string"},
+      {"name": "dstIP", "type": "string"},
+      {"name": "ipProtocol", "type": "string"},
+      {"name": "ipTos", "type": "string"},
+      {"name": "ipTtl", "type": "string"},
+      {"name": "udpSrcPort", "type": "string"},
+      {"name": "udpDstPort", "type": "string"},
+      {"name": "tcpFlags", "type": "string"},
+      {"name": "packetSize", "type": "string"},
+      {"name": "ipSize", "type": "string"},
+      {"name": "samplingRate", "type": "string"}
+    ]
+  }
 }

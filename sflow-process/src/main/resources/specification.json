@@ -7,7 +7,7 @@
   "inputs": {
     "cardinality": [
       1,
-      10
+      1
     ],
     "types": [
       "stream.t-stream"
@@ -16,17 +16,15 @@
   "outputs": {
     "cardinality": [
       1,
-      10
+      1
     ],
     "types": [
       "stream.t-stream"
     ]
   },
-  "module-type": "windowed-streaming",
-  "engine-name": "com.bwsw.windowed.streaming.engine",
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-  },
   "validator-class": "com.bwsw.sj.examples.sflow.module.process.Validator",
   "executor-class": "com.bwsw.sj.examples.sflow.module.process.Executor",
   "batch-collector-class": "com.bwsw.sj.examples.sflow.module.process.SflowBatchCollector"

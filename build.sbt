@@ -18,8 +18,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
-    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT",
-    "org.apache.avro" % "avro" % "1.8.1"
+    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT"
   ),
 
   assemblyMergeStrategy in assembly := {
@@ -38,10 +37,20 @@ val commonSettings = Seq(
   parallelExecution in Test := false
 )
 
+lazy val sflowDemoCommon = Project(id = "sflow-common",
+  base = file("./sflow-common"))
+  .settings(commonSettings: _*)
+
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
+  .dependsOn(sflowDemoCommon)
   .settings(commonSettings: _*)
 
 lazy val sflowDemoOutput = Project(id = "sflow-output",
   base = file("./sflow-output"))
+  .dependsOn(sflowDemoCommon)
+  .settings(commonSettings: _*)
+
+lazy val sflowDemoFallbackOutput = Project(id = "sflow-fallback-output",
+  base = file("./sflow-fallback-output"))
   .settings(commonSettings: _*)
