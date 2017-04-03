@@ -7,11 +7,7 @@
     "sflow-avro"
   ],
   "outputs": [
-    "srcasstream",
-    "dstasstream",
-    "srcipstream",
-    "dstipstream",
-    "srcdststream"
+    "output-stream"
   ],
   "stateManagement": "ram",
   "stateFullCheckpoint": 5,

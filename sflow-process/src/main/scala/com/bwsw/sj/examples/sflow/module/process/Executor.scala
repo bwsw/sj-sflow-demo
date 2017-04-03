@@ -5,19 +5,16 @@ import com.bwsw.sj.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.sj.examples.sflow.common._
+import com.bwsw.sj.examples.sflow.common.SflowRecord
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.util.Utf8
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
+
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
 
-  val srcAsStream = manager.getRoundRobinOutput("srcasstream")
-  val dstAsStream = manager.getRoundRobinOutput("dstasstream")
-  val srcDstStream = manager.getRoundRobinOutput("srcdststream")
-  val srcIpStream = manager.getRoundRobinOutput("srcipstream")
-  val dstIpStream = manager.getRoundRobinOutput("dstipstream")
+  val outputStream = manager.getRoundRobinOutput("output-stream")
 
   override def onInit() = {
     if (!state.isExist(stateField) || !state.get(stateField).isInstanceOf[Iterable[SflowRecord]])
@@ -69,37 +66,32 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onEnter(): Unit = {
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
-    sflowRecords.foreach { sflowRecord =>
-      srcAsStream.put(sflowRecord.getSrcAs)
-      dstAsStream.put(sflowRecord.getDstAs)
-      srcDstStream.put(sflowRecord.getSrcDstAs)
-      srcIpStream.put(sflowRecord.getSrcIp)
-      dstIpStream.put(sflowRecord.getDstIp)
-    }
+    sflowRecords.foreach(s => outputStream.put(s.getOutputRecord))
     state.set(stateField, Iterable[SflowRecord]())
   }
-}
 
-object FieldsNames {
-  val timestamp = "timestamp"
-  val name = "name"
-  val agentAddress = "agentAddress"
-  val inputPort = "inputPort"
-  val outputPort = "outputPort"
-  val srcMAC = "srcMAC"
-  val dstMAC = "dstMAC"
-  val ethernetType = "ethernetType"
-  val inVlan = "inVlan"
-  val outVlan = "outVlan"
-  val srcIP = "srcIP"
-  val dstIP = "dstIP"
-  val ipProtocol = "ipProtocol"
-  val ipTos = "ipTos"
-  val ipTtl = "ipTtl"
-  val udpSrcPort = "udpSrcPort"
-  val udpDstPort = "udpDstPort"
-  val tcpFlags = "tcpFlags"
-  val packetSize = "packetSize"
-  val ipSize = "ipSize"
-  val samplingRate = "samplingRate"
+  object FieldsNames {
+    val timestamp = "timestamp"
+    val name = "name"
+    val agentAddress = "agentAddress"
+    val inputPort = "inputPort"
+    val outputPort = "outputPort"
+    val srcMAC = "srcMAC"
+    val dstMAC = "dstMAC"
+    val ethernetType = "ethernetType"
+    val inVlan = "inVlan"
+    val outVlan = "outVlan"
+    val srcIP = "srcIP"
+    val dstIP = "dstIP"
+    val ipProtocol = "ipProtocol"
+    val ipTos = "ipTos"
+    val ipTtl = "ipTtl"
+    val udpSrcPort = "udpSrcPort"
+    val udpDstPort = "udpDstPort"
+    val tcpFlags = "tcpFlags"
+    val packetSize = "packetSize"
+    val ipSize = "ipSize"
+    val samplingRate = "samplingRate"
+  }
+
 }
