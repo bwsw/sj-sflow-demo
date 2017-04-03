@@ -20,7 +20,7 @@
   ],
   "lookupHistory": 100,
   "queueMaxSize": 10000,
-  "defaultEvictionPolicy": "NONE",
+  "defaultEvictionPolicy": "LFU",
   "evictionPolicy": "expanded-time",
   "options": {
     "line-separator": "\n",
