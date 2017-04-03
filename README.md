@@ -1,5 +1,13 @@
 # SJ Sflow Demo
 
+![](SflowDemo.png)
+
+There is a diagram that demonstrates the processing workflow of demo that is responsible for collecting of sflow information.
+Green, yellow, purple and red blocks are executed with SJ-Platform and it is sflow-csv-input module, sflow-process module
+sflow-output module and sflow-fallback-output module, respectively.
+The data come in input module from some sflow reporter, that sends a sflow records in CSV format to input module.
+Then the input module parses CSV-lines into Avro records and puts parsed data into sflow-avro.
+If the input module cannot parse data, then it put data into sflow-fallback. 
 
 ## Table of contents
 
