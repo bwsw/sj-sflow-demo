@@ -8,20 +8,24 @@ import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.sj.examples.sflow.common.SflowRecord
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.util.Utf8
+import org.slf4j.LoggerFactory
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
 
   val outputStream = manager.getRoundRobinOutput("output-stream")
 
   override def onInit() = {
+    logger.debug("Invoked onInit.")
     if (!state.isExist(stateField) || !state.get(stateField).isInstanceOf[Iterable[SflowRecord]])
       state.set(stateField, Iterable[SflowRecord]())
   }
 
   override def onWindow(windowRepository: WindowRepository): Unit = {
+    logger.debug("Invoked onWindow.")
     val storage = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
     val allWindows = windowRepository.getAll()
 
@@ -55,6 +59,8 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
         dstAs = tryResolve(_dstIP))
     })
 
+    logger.debug(s"Sflow records: ${sflowRecords.mkString(", ")}.")
+
     state.set(stateField, storage ++ sflowRecords)
   }
 
@@ -67,6 +73,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   }
 
   override def onEnter(): Unit = {
+    logger.debug("Invoked onEnter.")
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
     sflowRecords.foreach(s => outputStream.put(s.getOutputRecord))
     state.set(stateField, Iterable[SflowRecord]())

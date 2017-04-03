@@ -6,11 +6,14 @@ import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.common.OutputRecord
 import com.bwsw.sj.examples.sflow.module.output.data.{FieldsNames, OutputData}
+import org.slf4j.LoggerFactory
 
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
 class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[OutputRecord](manager) {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Transform t-stream transaction to output entities
@@ -19,7 +22,9 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     * @return List of output envelopes
     */
   override def onMessage(envelope: TStreamEnvelope[OutputRecord]) = {
+    logger.debug("Invoked onMessage.")
     envelope.data.map { outputRecord =>
+      logger.debug(s"OutputRecord: $outputRecord")
       new OutputData(
         outputRecord.srcIp,
         outputRecord.srcAs,
