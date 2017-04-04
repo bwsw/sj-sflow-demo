@@ -31,33 +31,39 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
     val envelopes = allWindows.flatMap(_._2.batches).flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Record]])
     val sflowRecords = envelopes.flatMap(_.data.map { avroRecord =>
-      val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[Utf8].toString
-      val _dstIP = avroRecord.get(FieldsNames.dstIP).asInstanceOf[Utf8].toString
-      SflowRecord(
-        timestamp = avroRecord.get(FieldsNames.timestamp).asInstanceOf[Utf8].toString.toLong,
-        name = avroRecord.get(FieldsNames.name).asInstanceOf[Utf8].toString,
-        agentAddress = avroRecord.get(FieldsNames.agentAddress).asInstanceOf[Utf8].toString,
-        inputPort = avroRecord.get(FieldsNames.inputPort).asInstanceOf[Utf8].toString.toInt,
-        outputPort = avroRecord.get(FieldsNames.outputPort).asInstanceOf[Utf8].toString.toInt,
-        srcMAC = avroRecord.get(FieldsNames.srcMAC).asInstanceOf[Utf8].toString,
-        dstMAC = avroRecord.get(FieldsNames.dstMAC).asInstanceOf[Utf8].toString,
-        ethernetType = avroRecord.get(FieldsNames.ethernetType).asInstanceOf[Utf8].toString,
-        inVlan = avroRecord.get(FieldsNames.inVlan).asInstanceOf[Utf8].toString.toInt,
-        outVlan = avroRecord.get(FieldsNames.outVlan).asInstanceOf[Utf8].toString.toInt,
-        srcIP = _srcIP,
-        dstIP = _dstIP,
-        ipProtocol = avroRecord.get(FieldsNames.ipProtocol).asInstanceOf[Utf8].toString.toInt,
-        ipTos = avroRecord.get(FieldsNames.ipTos).asInstanceOf[Utf8].toString,
-        ipTtl = avroRecord.get(FieldsNames.ipTtl).asInstanceOf[Utf8].toString.toInt,
-        udpSrcPort = avroRecord.get(FieldsNames.udpSrcPort).asInstanceOf[Utf8].toString.toInt,
-        udpDstPort = avroRecord.get(FieldsNames.udpDstPort).asInstanceOf[Utf8].toString.toInt,
-        tcpFlags = avroRecord.get(FieldsNames.tcpFlags).asInstanceOf[Utf8].toString,
-        packetSize = avroRecord.get(FieldsNames.packetSize).asInstanceOf[Utf8].toString.toInt,
-        ipSize = avroRecord.get(FieldsNames.ipSize).asInstanceOf[Utf8].toString.toInt,
-        samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[Utf8].toString.toInt,
-        srcAs = tryResolve(_srcIP),
-        dstAs = tryResolve(_dstIP))
-    })
+      try {
+        val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[Utf8].toString
+        val _dstIP = avroRecord.get(FieldsNames.dstIP).asInstanceOf[Utf8].toString
+        SflowRecord(
+          timestamp = avroRecord.get(FieldsNames.timestamp).asInstanceOf[Utf8].toString.toLong,
+          name = avroRecord.get(FieldsNames.name).asInstanceOf[Utf8].toString,
+          agentAddress = avroRecord.get(FieldsNames.agentAddress).asInstanceOf[Utf8].toString,
+          inputPort = avroRecord.get(FieldsNames.inputPort).asInstanceOf[Utf8].toString.toInt,
+          outputPort = avroRecord.get(FieldsNames.outputPort).asInstanceOf[Utf8].toString.toInt,
+          srcMAC = avroRecord.get(FieldsNames.srcMAC).asInstanceOf[Utf8].toString,
+          dstMAC = avroRecord.get(FieldsNames.dstMAC).asInstanceOf[Utf8].toString,
+          ethernetType = avroRecord.get(FieldsNames.ethernetType).asInstanceOf[Utf8].toString,
+          inVlan = avroRecord.get(FieldsNames.inVlan).asInstanceOf[Utf8].toString.toInt,
+          outVlan = avroRecord.get(FieldsNames.outVlan).asInstanceOf[Utf8].toString.toInt,
+          srcIP = _srcIP,
+          dstIP = _dstIP,
+          ipProtocol = avroRecord.get(FieldsNames.ipProtocol).asInstanceOf[Utf8].toString.toInt,
+          ipTos = avroRecord.get(FieldsNames.ipTos).asInstanceOf[Utf8].toString,
+          ipTtl = avroRecord.get(FieldsNames.ipTtl).asInstanceOf[Utf8].toString.toInt,
+          udpSrcPort = avroRecord.get(FieldsNames.udpSrcPort).asInstanceOf[Utf8].toString.toInt,
+          udpDstPort = avroRecord.get(FieldsNames.udpDstPort).asInstanceOf[Utf8].toString.toInt,
+          tcpFlags = avroRecord.get(FieldsNames.tcpFlags).asInstanceOf[Utf8].toString,
+          packetSize = avroRecord.get(FieldsNames.packetSize).asInstanceOf[Utf8].toString.toInt,
+          ipSize = avroRecord.get(FieldsNames.ipSize).asInstanceOf[Utf8].toString.toInt,
+          samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[Utf8].toString.toInt,
+          srcAs = tryResolve(_srcIP),
+          dstAs = tryResolve(_dstIP))
+      } catch {
+        case _: Throwable =>
+          logger.debug(s"Incorrect record.")
+          null
+      }
+    }).filter(_ != null)
 
     logger.debug(s"Sflow records: ${sflowRecords.mkString(", ")}.")
 
