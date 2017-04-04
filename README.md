@@ -3,11 +3,18 @@
 ![](SflowDemo.png)
 
 There is a diagram that demonstrates the processing workflow of demo that is responsible for collecting of sflow information.
-Green, yellow, purple and red blocks are executed with SJ-Platform and it is sflow-csv-input module, sflow-process module
-sflow-output module and sflow-fallback-output module, respectively.
+Green, yellow, purple and red blocks are executed with SJ-Platform and it is *sflow-csv-input module*, *'sflow-process'*
+module *'sflow-output'* module and *'sflow-fallback-output'* module, respectively.
+
 The data come in input module from some sflow reporter, that sends a sflow records in CSV format to input module.
-Then the input module parses CSV-lines into Avro records and puts parsed data into sflow-avro.
-If the input module cannot parse data, then it put data into sflow-fallback. 
+Then the input module parses CSV-lines into avro records and puts parsed data into *'sflow-avro'*.
+After that the process module parses avro record into sflow record, aggregates some information about source, 
+destination and traffic from sflow record and puts its in *'output-stream'*.
+Finally the output module just displace data from *'output-stream'* to table *'outputdata'* in PostgreSQL.
+ 
+If the input module cannot parse an input line, then it puts data into *'sflow-fallback'*.
+After that the fallback-output module move that incorrect line from *'sflow-fallback'* to table *'fallbackdata'* in PostgreSQL.
+
 
 ## Table of contents
 
