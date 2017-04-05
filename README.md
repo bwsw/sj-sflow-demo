@@ -3,7 +3,7 @@
 ![](SflowDemo.png)
 
 There is a diagram that demonstrates the processing workflow of demo that is responsible for collecting of sflow information.
-Green, yellow, purple and red blocks are executed with SJ-Platform and it is *sflow-csv-input module*, *'sflow-process'*
+Green, yellow, purple and red blocks are executed with SJ-Platform and it is *'sflow-csv-input'* module, *'sflow-process'*
 module *'sflow-output'* module and *'sflow-fallback-output'* module, respectively.
 
 The data come in input module from some sflow reporter, that sends a sflow records in CSV format to input module.
@@ -33,11 +33,29 @@ After that the fallback-output module move that incorrect line from *'sflow-fall
 
 ## Prerequisites
 
-- Running [SJ Platform](https://github.com/bwsw/sj-platform) with uploaded CSV Input module.
+- Running [SJ Platform](https://github.com/bwsw/sj-platform)
 - [SBT](http://www.scala-sbt.org/)
 
 
 ## Installation
+
+To configure environment
+
+```bash
+address=<host>:<port>
+```
+
+To build and upload CSV-input module
+
+```bash
+git clone https://github.com/bwsw/sj-platform.git
+cd sj-platform
+sbt sj-csv-input/assembly
+curl --form jar=@contrib/sj-platform/sj-csv-input/target/scala-2.12/sj-csv-input-1.0-SNAPSHOT.jar http://$address/v1/modules
+cd -
+```
+
+- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
 
 To build and upload all modules of sflow demo
 
@@ -45,14 +63,10 @@ To build and upload all modules of sflow demo
 git clone https://github.com/bwsw/sj-sflow-demo.git
 cd sj-sflow-demo
 sbt assembly
-address=<host>:<port>
-curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"1\",\"domain\": \"system\"}"
 curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
 curl --form jar=@sflow-output/target/scala-2.12/sflow-output-1.0.jar http://$address/v1/modules
 curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
 ```
-
-- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
 
 To upload GeoIP database (required for process module)
 
@@ -63,11 +77,12 @@ curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
 curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"geo-ip-as-num\",\"value\": \"GeoIPASNum.dat\",\"domain\": \"system\"}"
 ```
 
+
 ## Preparation
 
 ### Providers creation
 
-Before creation a providers you should replace next placeholders in [api-json/providers](api-json/providers):
+Before creation providers you should replace next placeholders in [api-json/providers](api-json/providers):
 *\<login\>*, *\<password\>*, *\<host\>* and *\<port\>*. Remove *"login"* and *"password"* fields if you not need 
 authentication to appropriate server. 
 
