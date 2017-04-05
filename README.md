@@ -45,6 +45,8 @@ To configure environment
 address=<host>:<port>
 ```
 
+- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
+
 To build and upload CSV-input module
 
 ```bash
@@ -54,8 +56,6 @@ sbt sj-csv-input/assembly
 curl --form jar=@contrib/sj-platform/sj-csv-input/target/scala-2.12/sj-csv-input-1.0-SNAPSHOT.jar http://$address/v1/modules
 cd -
 ```
-
-- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
 
 To build and upload all modules of sflow demo
 
