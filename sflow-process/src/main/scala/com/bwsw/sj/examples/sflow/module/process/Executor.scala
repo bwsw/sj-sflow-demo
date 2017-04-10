@@ -5,7 +5,8 @@ import com.bwsw.sj.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.sj.examples.sflow.common.SflowRecord
+import com.bwsw.sj.examples.sflow.common._
+import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.util.Utf8
 import org.slf4j.LoggerFactory
@@ -16,7 +17,11 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
 
-  val outputStream = manager.getRoundRobinOutput("output-stream")
+  val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
+  val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
+  val srcIpStream = manager.getRoundRobinOutput("src-ip-stream")
+  val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
+  val srcDstStream = manager.getRoundRobinOutput("src-dst-stream")
 
   override def onInit() = {
     logger.debug("Invoked onInit.")
@@ -81,7 +86,16 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   override def onEnter(): Unit = {
     logger.debug("Invoked onEnter.")
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
-    sflowRecords.foreach(s => outputStream.put(s.getOutputRecord))
+    val gen = new Generator()
+    gen.putRecords(sflowRecords)
+
+    gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
+    gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
+    gen.SrcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
+    gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
+    gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
+
+    gen.clear()
     state.set(stateField, Iterable[SflowRecord]())
   }
 

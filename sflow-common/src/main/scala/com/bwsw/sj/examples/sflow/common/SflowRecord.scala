@@ -26,6 +26,4 @@ case class SflowRecord(
     var dstAs: Int = 0) {
 
   def getTraffic = packetSize * samplingRate
-
-  def getOutputRecord = OutputRecord(srcIP, srcAs, dstIP, dstAs, getTraffic)
 }
