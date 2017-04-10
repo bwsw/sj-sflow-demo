@@ -37,17 +37,17 @@ val commonSettings = Seq(
   parallelExecution in Test := false
 )
 
+lazy val root = (project in file(".")) aggregate(
+  sflowDemoProcess,
+  sflowDemoFallbackOutput
+)
+
 lazy val sflowDemoCommon = Project(id = "sflow-common",
   base = file("./sflow-common"))
   .settings(commonSettings: _*)
 
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
-  .dependsOn(sflowDemoCommon)
-  .settings(commonSettings: _*)
-
-lazy val sflowDemoOutput = Project(id = "sflow-output",
-  base = file("./sflow-output"))
   .dependsOn(sflowDemoCommon)
   .settings(commonSettings: _*)
 
