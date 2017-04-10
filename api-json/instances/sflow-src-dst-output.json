@@ -1,0 +1,19 @@
+{
+  "name": "sflow-src-dst-output",
+  "description": "Output module for sflow-demo",
+  "input": "src-dst-stream",
+  "output": "srcdstdata",
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 1,
+  "parallelism": 1,
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 192,
+  "jvmOptions": {
+    "-Xmx": "32m",
+    "-Xms": "16m",
+    "-XX:MaxDirectMemorySize=": "4m",
+    "-XX:MaxMetaspaceSize=": "64m"
+  },
+  "coordinationService": "zookeeper-sflow-service"
+}

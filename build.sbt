@@ -39,6 +39,8 @@ val commonSettings = Seq(
 
 lazy val root = (project in file(".")) aggregate(
   sflowDemoProcess,
+  sflowDemoSrcIpOutput,
+  sflowDemoSrcDstOutput,
   sflowDemoFallbackOutput
 )
 
@@ -48,6 +50,16 @@ lazy val sflowDemoCommon = Project(id = "sflow-common",
 
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
+  .dependsOn(sflowDemoCommon)
+  .settings(commonSettings: _*)
+
+lazy val sflowDemoSrcIpOutput = Project(id = "sflow-src-ip-output",
+  base = file("./sflow-output/src-ip"))
+  .dependsOn(sflowDemoCommon)
+  .settings(commonSettings: _*)
+
+lazy val sflowDemoSrcDstOutput = Project(id = "sflow-src-dst-output",
+  base = file("./sflow-output/src-dst"))
   .dependsOn(sflowDemoCommon)
   .settings(commonSettings: _*)
 
