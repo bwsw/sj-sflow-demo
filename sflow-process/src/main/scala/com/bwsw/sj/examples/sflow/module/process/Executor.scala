@@ -17,11 +17,13 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
 
-  val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
-  val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
+  //  val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
+  //  val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
+  //  val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
   val srcIpStream = manager.getRoundRobinOutput("src-ip-stream")
-  val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
   val srcDstStream = manager.getRoundRobinOutput("src-dst-stream")
+
+  val gen = new Generator()
 
   override def onInit() = {
     logger.debug("Invoked onInit.")
@@ -86,13 +88,12 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   override def onEnter(): Unit = {
     logger.debug("Invoked onEnter.")
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
-    val gen = new Generator()
     gen.putRecords(sflowRecords)
 
-    gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
-    gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
+    //    gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
+    //    gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
+    //    gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
     gen.SrcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
-    gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
     gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
 
     gen.clear()

@@ -8,7 +8,6 @@ import com.hazelcast.mapreduce.{JobTracker, KeyValueSource}
 
 import scala.collection.JavaConverters._
 
-
 class Generator {
   var hazelcastMapName = "hazelcast"
   var trackerName = "tracker"
@@ -59,7 +58,7 @@ class Generator {
   }
 
   def getSource: KeyValueSource[String, SflowRecord] = {
-    if (source.isEmpty) source = Some(KeyValueSource.fromMap[String, SflowRecord] (getMap))
+    if (source.isEmpty) source = Some(KeyValueSource.fromMap[String, SflowRecord](getMap))
     source.get
   }
 
@@ -73,19 +72,19 @@ class Generator {
     records.foreach(sflowRecord => imap.put(uuid, sflowRecord))
   }
 
-  def getMap: IMap[String, SflowRecord] = {
+  def getMap: IMap[String, SflowRecord] =
     getHazelcastInstance.getMap[String, SflowRecord](hazelcastMapName)
-  }
 
-  def setHazelcastMapName(mapName: String) = hazelcastMapName = mapName
+  def setHazelcastMapName(mapName: String) =
+    hazelcastMapName = mapName
 
 
-  def getHazelcastInstance: HazelcastInstance  = {
+  def getHazelcastInstance: HazelcastInstance = {
     if (hazelcastInstance.isEmpty) hazelcastInstance = Some(Hazelcast.newHazelcastInstance(getHazelcastConfig))
     hazelcastInstance.get
   }
 
-  def getHazelcastConfig:Config = {
+  def getHazelcastConfig: Config = {
     val config = new XmlConfigBuilder().build
 
     val tcpIpConfig = new TcpIpConfig
@@ -98,13 +97,11 @@ class Generator {
 
     val networkConfig = new NetworkConfig
     networkConfig.setJoin(joinConfig)
-    config.setNetworkConfig(networkConfig)
+    val classLoader = getClass.getClassLoader
+    config.setNetworkConfig(networkConfig).setClassLoader(classLoader)
   }
 
   def uuid = java.util.UUID.randomUUID.toString
 
-  def clear() = getMap.destroy()
+  def clear() = getMap.clear()
 }
-
-
-
