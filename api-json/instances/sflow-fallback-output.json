@@ -11,9 +11,8 @@
   "perTaskRam": 192,
   "jvmOptions": {
     "-Xmx": "32m",
-    "-Xms": "16m",
-    "-XX:MaxDirectMemorySize=": "4m",
-    "-XX:MaxMetaspaceSize=": "64m"
+    "-XX:MaxMetaspaceSize=": "96m",
+    "-XX:MaxDirectMemorySize=": "4m"
   },
   "coordinationService": "zookeeper-sflow-service",
   "inputAvroSchema": {

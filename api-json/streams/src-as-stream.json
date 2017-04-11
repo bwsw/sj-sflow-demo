@@ -1,11 +1,14 @@
 {
   "name": "src-as-stream",
-  "description": "JDBC stream for demo",
-  "service": "jdbc-sflow-service",
+  "description": "Tstream for demo",
+  "service": "tstream-sflow-service",
   "tags": [
     "sflow",
-    "output"
+    "process"
   ],
-  "primary": "id",
-  "type": "jdbc-output"
+  "partitions": 1,
+  "generator": {
+    "generatorType": "local"
+  },
+  "type": "stream.t-stream"
 }

@@ -1,8 +1,8 @@
 {
   "name": "sflow-process",
   "description": "Batch module for sflow example",
-  "window": 3,
-  "slidingInterval": 1,
+  "window": 8,
+  "slidingInterval": 4,
   "inputs": [
     "sflow-avro"
   ],
@@ -20,9 +20,9 @@
   "perTaskCores": 0.1,
   "perTaskRam": 192,
   "jvmOptions": {
-    "-Xmx": "32m",
-    "-XX:MaxDirectMemorySize=": "4m",
-    "-XX:MaxMetaspaceSize=": "64m"
+    "-Xmx": "64m",
+    "-XX:MaxMetaspaceSize=": "120m",
+    "-XX:MaxDirectMemorySize=": "4m"
   },
   "eventWaitTime": 1000,
   "coordinationService": "zookeeper-sflow-service",
