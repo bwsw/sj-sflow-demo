@@ -64,7 +64,8 @@ git clone https://github.com/bwsw/sj-sflow-demo.git
 cd sj-sflow-demo
 sbt assembly
 curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
-curl --form jar=@sflow-output/target/scala-2.12/sflow-output-1.0.jar http://$address/v1/modules
+curl --form jar=@sflow-output/src-ip/target/scala-2.12/sflow-src-ip-output-1.0.jar http://$address/v1/modules
+curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
 curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
 ```
 
@@ -100,11 +101,16 @@ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application
 SQL tables for output must be created in database *sflow*. To create tables
 
 ```sql
-CREATE TABLE outputdata (
+CREATE TABLE srcipdata (
     id VARCHAR(255) PRIMARY KEY,
     src_ip VARCHAR(32),
+    traffic INTEGER,
+    txn BIGINT
+);
+
+CREATE TABLE srcdstdata (
+    id VARCHAR(255) PRIMARY KEY,
     src_as INTEGER,
-    dst_ip VARCHAR(32),
     dst_as INTEGER,
     traffic INTEGER,
     txn BIGINT
@@ -142,17 +148,19 @@ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/j
 - *sflow-avro* &mdash; stream for correctly parsed sflow records;
 - *sflow-fallback* &mdash; stream for incorrect inputs.
 
-To create an output stream of process module that will be used for keeping an information about source and destination
+To create output streams of process module that will be used for keeping an information about source and destination
 ip addresses and traffic
 
 ```bash
-curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/output-stream.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
 ```
 
-To create an output stream of output module that will be used for storing an information to database 
+To create output streams of output module that will be used for storing an information to database 
 
 ```bash
-curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/output-data.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 ```
 
 To create an output stream of fallback-output module hat will be used for storing an incorrect inputs to database 
@@ -176,13 +184,15 @@ To create an instance of process module
 curl --request POST "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-process.json"
 ```
 
-To create an instance of output module
+To create instances of output module
 
 ```bash
-curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-output.json"
+curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
+curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
 ```
 
 To create an instance of fallback output module
+
 ```bash
 curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-fallback-output.json"
 ```
@@ -205,7 +215,8 @@ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0
 To launch output module
 
 ```bash
-curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-output/start"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/start"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/start"
 ```
 
 To launch fallback output module
@@ -254,7 +265,8 @@ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0
 To stop the output module
 
 ```bash
-curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-output/stop"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/stop"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/stop"
 ```
 
 To stop the fallback-output module
@@ -269,7 +281,8 @@ curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-o
 To see a results execute query in database: 
 
 ```sql
-SELECT * FROM outputdata;
+SELECT * FROM srcipdata;
+SELECT * FROM srcdstdata;
 SELECT * FROM fallbackdata;
 ```
 
