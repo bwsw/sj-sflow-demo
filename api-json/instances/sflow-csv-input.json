@@ -52,7 +52,7 @@
       "timestamp",
       "name"
     ],
-    "distribute": [
+    "distribution": [
       "timestamp",
       "srcIP",
       "dstIP"

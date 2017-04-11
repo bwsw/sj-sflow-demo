@@ -7,10 +7,7 @@
     "sflow-avro"
   ],
   "outputs": [
-    "src-as-stream",
-    "dst-as-stream",
     "src-ip-stream",
-    "dst-ip-stream",
     "src-dst-stream"
   ],
   "stateManagement": "ram",
