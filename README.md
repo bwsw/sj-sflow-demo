@@ -38,6 +38,7 @@ After that the fallback-output module move that incorrect line from *'sflow-fall
 
 - Running [SJ Platform](https://github.com/bwsw/sj-platform)
 - [SBT](http://www.scala-sbt.org/)
+- Python
 
 
 ## Installation
@@ -247,7 +248,7 @@ and look at field named tasks, e.g. it will look like
 And now you can start the flow (replace *\<host\>* and *\<port\>* by values from gotten JSON):
 
 ```bash
-for line in $(cat sflow_example.csv); do echo $line | nc <host> <port>; done
+python send_sflow.py -p <port> -h <host> sflow_example.csv
 ```
 
 
