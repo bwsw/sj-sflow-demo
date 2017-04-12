@@ -22,7 +22,7 @@
   "defaultEvictionPolicy": "LFU",
   "evictionPolicy": "expanded-time",
   "options": {
-    "line-separator": "\n",
+    "lineSeparator": "\n",
     "fields": [
       "timestamp",
       "name",
@@ -47,8 +47,8 @@
       "samplingRate"
     ],
     "encoding": "UTF-8",
-    "output-stream": "sflow-avro",
-    "unique-key": [
+    "outputStream": "sflow-avro",
+    "uniqueKey": [
       "timestamp",
       "name"
     ],
@@ -57,6 +57,6 @@
       "srcIP",
       "dstIP"
     ],
-    "fallback-stream": "sflow-fallback"
+    "fallbackStream": "sflow-fallback"
   }
 }
