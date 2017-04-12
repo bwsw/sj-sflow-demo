@@ -51,14 +51,11 @@ address=<host>:<port>
 
 - *\<host\>:\<port\>* &mdash; SJ Rest host and port.
 
-To build and upload CSV-input module
+To upload CSV-input module
 
 ```bash
-git clone https://github.com/bwsw/sj-platform.git
-cd sj-platform
-sbt sj-csv-input/assembly
-curl --form jar=@contrib/sj-platform/sj-csv-input/target/scala-2.12/sj-csv-input-1.0-SNAPSHOT.jar http://$address/v1/modules
-cd -
+curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
+curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 ```
 
 To build and upload all modules of sflow demo
