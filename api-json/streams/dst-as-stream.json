@@ -1,0 +1,11 @@
+{
+  "name": "dst-as-stream",
+  "description": "Tstream for demo",
+  "service": "tstream-sflow-service",
+  "tags": [
+    "sflow",
+    "process"
+  ],
+  "partitions": 1,
+  "type": "stream.t-stream"
+}

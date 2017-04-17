@@ -3,14 +3,17 @@
 ![](SflowDemo.png)
 
 There is a diagram that demonstrates the processing workflow of demo that is responsible for collecting of sflow information.
-Green, yellow, purple and red blocks are executed with SJ-Platform and it is *sflow-csv-input module*, *'sflow-process'*
-module *'sflow-output'* module and *'sflow-fallback-output'* module, respectively.
+Green, yellow, purple and red blocks are executed with SJ-Platform and it is *'sflow-csv-input'* module, *'sflow-process'*
+module *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules and *'sflow-fallback-output'* module, respectively.
 
-The data come in input module from some sflow reporter, that sends a sflow records in CSV format to input module.
+The data come in input module from some sflow reporter, that sends sflow records in CSV format to input module.
 Then the input module parses CSV-lines into avro records and puts parsed data into *'sflow-avro'*.
-After that the process module parses avro record into sflow record, aggregates some information about source, 
-destination and traffic from sflow record and puts its in *'output-stream'*.
-Finally the output module just displace data from *'output-stream'* to table *'outputdata'* in PostgreSQL.
+After that the process module parses avro record into sflow record, and then:
+- computes traffic for source IP and puts its in *'src-ip-stream'*;
+- computes traffic between source and destination and puts its in *'src-dst-stream'*.
+
+Finally the *'sflow-src-ip-output'* module just displace data from *'src-ip-stream'* to table *'srcipdata'* in PostgreSQL.
+The *'sflow-src-dst-output'* module does the same for *'src-dst-stream'* and table *'srcdstdata'*.
  
 If the input module cannot parse an input line, then it puts data into *'sflow-fallback'*.
 After that the fallback-output module move that incorrect line from *'sflow-fallback'* to table *'fallbackdata'* in PostgreSQL.
@@ -33,11 +36,27 @@ After that the fallback-output module move that incorrect line from *'sflow-fall
 
 ## Prerequisites
 
-- Running [SJ Platform](https://github.com/bwsw/sj-platform) with uploaded CSV Input module.
+- Running [SJ Platform](https://github.com/bwsw/sj-platform)
 - [SBT](http://www.scala-sbt.org/)
+- Python
 
 
 ## Installation
+
+To configure environment
+
+```bash
+address=<host>:<port>
+```
+
+- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
+
+To upload CSV-input module
+
+```bash
+curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
+curl --form jar=@sj-csv-input.jar http://$address/v1/modules
+```
 
 To build and upload all modules of sflow demo
 
@@ -45,14 +64,11 @@ To build and upload all modules of sflow demo
 git clone https://github.com/bwsw/sj-sflow-demo.git
 cd sj-sflow-demo
 sbt assembly
-address=<host>:<port>
-curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"1\",\"domain\": \"system\"}"
 curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
-curl --form jar=@sflow-output/target/scala-2.12/sflow-output-1.0.jar http://$address/v1/modules
+curl --form jar=@sflow-output/src-ip/target/scala-2.12/sflow-src-ip-output-1.0.jar http://$address/v1/modules
+curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
 curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
 ```
-
-- *\<host\>:\<port\>* &mdash; SJ Rest host and port.
 
 To upload GeoIP database (required for process module)
 
@@ -63,11 +79,12 @@ curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
 curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"geo-ip-as-num\",\"value\": \"GeoIPASNum.dat\",\"domain\": \"system\"}"
 ```
 
+
 ## Preparation
 
 ### Providers creation
 
-Before creation a providers you should replace next placeholders in [api-json/providers](api-json/providers):
+Before creation providers you should replace next placeholders in [api-json/providers](api-json/providers):
 *\<login\>*, *\<password\>*, *\<host\>* and *\<port\>*. Remove *"login"* and *"password"* fields if you not need 
 authentication to appropriate server. 
 
@@ -84,11 +101,16 @@ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application
 SQL tables for output must be created in database *sflow*. To create tables
 
 ```sql
-CREATE TABLE outputdata (
+CREATE TABLE srcipdata (
     id VARCHAR(255) PRIMARY KEY,
     src_ip VARCHAR(32),
+    traffic INTEGER,
+    txn BIGINT
+);
+
+CREATE TABLE srcdstdata (
+    id VARCHAR(255) PRIMARY KEY,
     src_as INTEGER,
-    dst_ip VARCHAR(32),
     dst_as INTEGER,
     traffic INTEGER,
     txn BIGINT
@@ -125,17 +147,19 @@ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/j
 - *sflow-avro* &mdash; stream for correctly parsed sflow records;
 - *sflow-fallback* &mdash; stream for incorrect inputs.
 
-To create an output stream of process module that will be used for keeping an information about source and destination
+To create output streams of process module that will be used for keeping an information about source and destination
 ip addresses and traffic
 
 ```bash
-curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/output-stream.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
 ```
 
-To create an output stream of output module that will be used for storing an information to database 
+To create output streams of output module that will be used for storing an information to database 
 
 ```bash
-curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/output-data.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
+curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 ```
 
 To create an output stream of fallback-output module hat will be used for storing an incorrect inputs to database 
@@ -159,13 +183,15 @@ To create an instance of process module
 curl --request POST "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-process.json"
 ```
 
-To create an instance of output module
+To create instances of output module
 
 ```bash
-curl --request POST "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-output.json"
+curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
+curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
 ```
 
 To create an instance of fallback output module
+
 ```bash
 curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-fallback-output.json"
 ```
@@ -188,7 +214,8 @@ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0
 To launch output module
 
 ```bash
-curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-output/start"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/start"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/start"
 ```
 
 To launch fallback output module
@@ -216,7 +243,7 @@ and look at field named tasks, e.g. it will look like
 And now you can start the flow (replace *\<host\>* and *\<port\>* by values from gotten JSON):
 
 ```bash
-for line in $(cat sflow_example.csv); do echo $line | nc <host> <port>; done
+python send_sflow.py -p <port> -h <host> sflow_example.csv
 ```
 
 
@@ -237,7 +264,8 @@ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0
 To stop the output module
 
 ```bash
-curl --request GET "http://$address/v1/modules/output-streaming/sflow-output/1.0/instance/sflow-output/stop"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/stop"
+curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/stop"
 ```
 
 To stop the fallback-output module
@@ -252,19 +280,35 @@ curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-o
 To see a results execute query in database: 
 
 ```sql
-SELECT * FROM outputdata;
+SELECT * FROM srcipdata;
+SELECT * FROM srcdstdata;
 SELECT * FROM fallbackdata;
 ```
 
 You should see something like this:
 
 ```
-                  id                  |   src_ip    | src_as |   dst_ip    | dst_as | traffic |        txn        
---------------------------------------+-------------+--------+-------------+--------+---------+-------------------
- 6bbf7db3-c7df-4160-ad7c-f0a36a78bea2 | 66.77.88.99 |    209 | 44.33.22.11 |   7377 |  172500 | 14911978205550000
- c5497904-3f6d-4987-b935-d6dca12a1677 | 11.22.33.44 |      0 | 44.33.22.11 |   7377 |  172500 | 14911978205550000
-(2 rows)
+sflow=# SELECT * FROM srcipdata;
+                  id                  |    src_ip    | traffic |        txn        
+--------------------------------------+--------------+---------+-------------------
+ 84cf5fad-aa64-4081-a9bc-3ce51110953d | 66.77.88.99  | 1055750 | 14918948733750000
+ 65dcbeb2-7a6c-4a2b-a622-b030e13ef546 | 11.22.33.44  |  588000 | 14918948733750000
+ 6b26b6cf-f4a8-4334-839f-86e1404bca16 | 11.73.81.44  |  660500 | 14918948733750000
+ 5492c762-b536-49b5-8088-1649cc09f0fb | 11.22.33.201 |  310500 | 14918948733750000
+(4 rows)
 
+sflow=# SELECT * FROM srcdstdata;
+                  id                  | src_as | dst_as | traffic |        txn        
+--------------------------------------+--------+--------+---------+-------------------
+ 4b18d026-de4c-43fa-a765-8b308c28f75b |      0 |      0 |  100000 | 14918948736400000
+ a43f0243-3ba7-4305-9664-3d0938bad394 |      0 |      0 | 1148500 | 14918948736400000
+ cc326d39-8de5-487b-bfff-87b3202ef645 |    209 |    209 |  293250 | 14918948736400000
+ 236942d4-a334-4f4f-845f-c288bca6cebd |      0 |      0 |  310500 | 14918948736400000
+ afca82ab-5f30-4e09-886c-a689554621c7 |    209 |    209 |  172500 | 14918948736400000
+ d8a34274-db5b-480b-8b6c-bd36b991d131 |    209 |    209 |  590000 | 14918948736400000
+(6 rows)
+
+sflow=# SELECT * FROM fallbackdata;
                   id                  |                      line                       |        txn        
 --------------------------------------+-------------------------------------------------+-------------------
  31652ea0-7437-4c48-990c-22ceab50d6af | 1490234369,sfr6,10.11.12.13,4444,5555,INCORRECT | 14911974375950000

@@ -6,14 +6,13 @@
   "perTaskRam": 192,
   "jvmOptions": {
     "-Xmx": "32m",
-    "-Xms": "16m",
-    "-XX:MaxDirectMemorySize=": "4m",
-    "-XX:MaxMetaspaceSize=": "64m"
+    "-XX:MaxMetaspaceSize=": "96m",
+    "-XX:MaxDirectMemorySize=": "4m"
   },
   "coordinationService": "zookeeper-sflow-service",
   "performanceReportingInterval": 10000,
   "checkpointMode": "every-nth",
-  "checkpointInterval": 3,
+  "checkpointInterval": 4,
   "outputs": [
     "sflow-avro",
     "sflow-fallback"
@@ -23,7 +22,7 @@
   "defaultEvictionPolicy": "LFU",
   "evictionPolicy": "expanded-time",
   "options": {
-    "line-separator": "\n",
+    "lineSeparator": "\n",
     "fields": [
       "timestamp",
       "name",
@@ -48,16 +47,16 @@
       "samplingRate"
     ],
     "encoding": "UTF-8",
-    "output-stream": "sflow-avro",
-    "unique-key": [
+    "outputStream": "sflow-avro",
+    "uniqueKey": [
       "timestamp",
       "name"
     ],
-    "distribute": [
+    "distribution": [
       "timestamp",
       "srcIP",
       "dstIP"
     ],
-    "fallback-stream": "sflow-fallback"
+    "fallbackStream": "sflow-fallback"
   }
 }
