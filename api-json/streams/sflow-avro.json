@@ -8,8 +8,5 @@
     "avro"
   ],
   "type": "stream.t-stream",
-  "partitions": 3,
-  "generator": {
-    "generatorType": "local"
-  }
+  "partitions": 3
 }

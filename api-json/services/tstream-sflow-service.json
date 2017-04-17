@@ -2,10 +2,7 @@
   "name": "tstream-sflow-service",
   "description": "Tstream service for demo",
   "type": "TstrQ",
-  "metadataProvider": "cassandra-sflow-provider",
-  "metadataNamespace": "sflow",
-  "dataProvider": "cassandra-sflow-provider",
-  "dataNamespace": "sflow",
-  "lockProvider": "zookeeper-sflow-provider",
-  "lockNamespace": "sflow"
+  "provider": "zookeeper-sflow-provider",
+  "prefix": "/sflow",
+  "token": "sflow"
 }
