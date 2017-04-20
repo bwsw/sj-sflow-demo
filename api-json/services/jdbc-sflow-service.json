@@ -1,5 +1,5 @@
 {
-  "name": "jdbc-sflow-service",
+  "name": "jdbcsflowservice",
   "description": "JDBC service for demo",
   "provider": "jdbc-sflow-provider",
   "database": "sflow",

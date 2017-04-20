@@ -1,7 +1,7 @@
 {
   "name": "srcasdata",
   "description": "JDBC stream for demo",
-  "service": "jdbc-sflow-service",
+  "service": "jdbcsflowservice",
   "tags": [
     "sflow",
     "output"
