@@ -18,8 +18,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
-    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT" % "provided",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
+    "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT" % "provided"
   ),
 
   assemblyMergeStrategy in assembly := {
@@ -52,7 +51,10 @@ lazy val sflowDemoCommon = Project(id = "sflow-common",
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
   .dependsOn(sflowDemoCommon)
-  .settings(commonSettings: _*)
+  .settings(
+    commonSettings,
+    libraryDependencies += "com.hazelcast" % "hazelcast" % "3.7.3"
+  )
 
 lazy val sflowDemoSrcIpOutput = Project(id = "sflow-src-ip-output",
   base = file("./sflow-output/src-ip"))
