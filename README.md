@@ -79,6 +79,18 @@ curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
 curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"geo-ip-as-num\",\"value\": \"GeoIPASNum.dat\",\"domain\": \"system\"}"
 ```
 
+To upload and configure JDBC driver (determine *\<driver_name\>*)
+
+```bash
+curl https://jdbc.postgresql.org/download/postgresql-42.0.0.jar -O
+curl --form file=@postgresql-42.0.0.jar http://$address/v1/custom/files
+curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>\",\"value\": \"postgresql-42.0.0.jar\",\"domain\": \"jdbc\"}" 
+curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"jdbc\"}" 
+curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"jdbc\"}" 
+```
+
+Replace *\<driver_name\>* in [api-json/providers/jdbc-sflow-provider.json](api-json/providers/jdbc-sflow-provider.json).
+
 
 ## Preparation
 
