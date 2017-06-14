@@ -89,13 +89,17 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     logger.debug("Invoked onEnter.")
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
     gen.putRecords(sflowRecords)
+  }
 
+  override def onLeaderEnter(): Unit = {
     //    gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
     //    gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
     //    gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
     gen.SrcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
     gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
+  }
 
+  override def onLeave(): Unit = {
     gen.clear()
     state.set(stateField, Iterable[SflowRecord]())
   }
