@@ -15,7 +15,6 @@ import org.scalatest.{FlatSpec, Matchers}
   * @author Pavel Tomskikh
   */
 class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
-
   val transactionField = "txn"
   val table = "output"
   val deletionQueryPrefix = s"DELETE FROM $table WHERE $transactionField = "
@@ -25,7 +24,14 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     .name(recordField).`type`().stringType().noDefault()
     .endRecord()
 
-  "Executor" should "work properly before first checkpoint" in new TestPreparation {
+  val manager = mock[OutputEnvironmentManager]
+  when(manager.isCheckpointInitiated).thenReturn(false)
+  val executor = new Executor(manager)
+  val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+
+  "Executor" should "work properly before first checkpoint" in {
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
+
     val transactions = Seq(
       Seq(
         "incorrect input 1",
@@ -56,7 +62,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
   }
 
-  it should "work properly after first checkpoint" in new TestPreparation {
+  it should "work properly after first checkpoint" in {
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
@@ -83,15 +90,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
         val expectedQueryRegex = createInsertionRegex(transactionId, line)
         statement.getQuery should include regex expectedQueryRegex
     }
-  }
-
-  trait TestPreparation {
-    val manager = mock[OutputEnvironmentManager]
-    when(manager.isCheckpointInitiated).thenReturn(false)
-
-    val executor = new Executor(manager)
-    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
-    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
   }
 
   def createInsertionRegex(transactionId: Long, line: String): String =

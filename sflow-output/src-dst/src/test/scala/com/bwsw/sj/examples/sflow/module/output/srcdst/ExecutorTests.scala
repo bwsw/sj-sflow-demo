@@ -21,7 +21,14 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val insertionQueryRegexPrefix = s"INSERT INTO $table " +
     s"\\($idField,$srcAsField,$dstAsField,$trafficField,$transactionField\\) VALUES \\('[-0-9a-f]*',"
 
-  "Executor" should "work properly before first checkpoint" in new TestPreparation {
+  val manager = mock[OutputEnvironmentManager]
+  when(manager.isCheckpointInitiated).thenReturn(false)
+  val executor = new Executor(manager)
+  val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+
+  "Executor" should "work properly before first checkpoint" in {
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
+
     val transactions = Seq(
       Seq(
         SrcDstAs(10, 100, 1000),
@@ -52,7 +59,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
   }
 
-  it should "work properly after first checkpoint" in new TestPreparation {
+  it should "work properly after first checkpoint" in {
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
@@ -79,15 +87,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
         val expectedQueryRegex = createInsertionRegex(transactionId, srcDstAs)
         statement.getQuery should include regex expectedQueryRegex
     }
-  }
-
-  trait TestPreparation {
-    val manager = mock[OutputEnvironmentManager]
-    when(manager.isCheckpointInitiated).thenReturn(false)
-
-    val executor = new Executor(manager)
-    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
-    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
   }
 
   def createInsertionRegex(transactionId: Long, srcDstAs: SrcDstAs): String =
