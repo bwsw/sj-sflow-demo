@@ -21,15 +21,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val insertionQueryRegexPrefix = s"INSERT INTO $table " +
     s"\\($idField,$srcAsField,$dstAsField,$trafficField,$transactionField\\) VALUES \\('[-0-9a-f]*',"
 
-  "Executor" should "work properly" in {
-    val manager = mock[OutputEnvironmentManager]
-    when(manager.isCheckpointInitiated).thenReturn(false)
-
-    val executor = new Executor(manager)
-    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
-    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
-
-    val transactionsBeforeCheckpoint = Map(
+  "Executor" should "work properly before first checkpoint" in new TestPreparation {
+    val transactions = Map(
       0l -> Seq(
         SrcDstAs(10, 100, 1000),
         SrcDstAs(20, 200, 2000)),
@@ -38,29 +31,19 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       2l -> Seq(
         SrcDstAs(40, 400, 4000)))
 
-    val transactionsAfterCheckpoint = Map(
-      3l -> Seq(
-        SrcDstAs(50, 500, 5000),
-        SrcDstAs(60, 600, 6000)),
-      4l -> Seq(
-        SrcDstAs(70, 700, 7000)),
-      5l -> Seq(
-        SrcDstAs(80, 800, 8000),
-        SrcDstAs(90, 900, 9000)))
-
-    transactionsBeforeCheckpoint.foreach {
+    transactions.foreach {
       case (_, transaction) => engineSimulator.prepare(transaction)
     }
 
-    val queriesBeforeCheckpoint = engineSimulator.process()
+    val queries = engineSimulator.process()
 
-    val expectedQueriesBeforeCheckpoint = transactionsBeforeCheckpoint.toSeq.flatMap {
+    val expectedQueriesData = transactions.toSeq.flatMap {
       case (transactionId, transaction) =>
         transactionId +: transaction.map(srcDstAs => (transactionId, srcDstAs))
     }
-    queriesBeforeCheckpoint.length shouldBe expectedQueriesBeforeCheckpoint.size
+    queries.length shouldBe expectedQueriesData.length
 
-    expectedQueriesBeforeCheckpoint.zip(queriesBeforeCheckpoint).foreach {
+    expectedQueriesData.zip(queries).foreach {
       case (transactionId: Long, statement) =>
         val expectedQuery = deletionQueryPrefix + transactionId
         statement.getQuery shouldBe expectedQuery
@@ -71,28 +54,48 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
       case _ => throw new IllegalStateException
     }
+  }
 
-
+  it should "work properly after first checkpoint" in new TestPreparation {
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
-    transactionsAfterCheckpoint.foreach {
+    val transactions = Map(
+      0l -> Seq(
+        SrcDstAs(50, 500, 5000),
+        SrcDstAs(60, 600, 6000)),
+      1l -> Seq(
+        SrcDstAs(70, 700, 7000)),
+      2l -> Seq(
+        SrcDstAs(80, 800, 8000),
+        SrcDstAs(90, 900, 9000)))
+
+    transactions.foreach {
       case (_, transaction) => engineSimulator.prepare(transaction)
     }
 
-    val queriesAfterCheckpoint = engineSimulator.process()
+    val queries = engineSimulator.process()
 
-    val expectedQueriesAfterCheckpoint = transactionsAfterCheckpoint.toSeq.flatMap {
+    val expectedQueriesData = transactions.toSeq.flatMap {
       case (transactionId, transaction) =>
         transaction.map(srcDstAs => (transactionId, srcDstAs))
     }
-    queriesAfterCheckpoint.length shouldBe expectedQueriesAfterCheckpoint.size
+    queries.length shouldBe expectedQueriesData.length
 
-    expectedQueriesAfterCheckpoint.zip(queriesAfterCheckpoint).foreach {
+    expectedQueriesData.zip(queries).foreach {
       case ((transactionId, srcDstAs), statement) =>
         val expectedQueryRegex = createInsertionRegex(transactionId, srcDstAs)
         statement.getQuery should include regex expectedQueryRegex
     }
+  }
+
+  trait TestPreparation {
+    val manager = mock[OutputEnvironmentManager]
+    when(manager.isCheckpointInitiated).thenReturn(false)
+
+    val executor = new Executor(manager)
+    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
   }
 
   def createInsertionRegex(transactionId: Long, srcDstAs: SrcDstAs): String =

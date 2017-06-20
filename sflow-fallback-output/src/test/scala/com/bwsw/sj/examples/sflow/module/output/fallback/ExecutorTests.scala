@@ -25,15 +25,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     .name(recordField).`type`().stringType().noDefault()
     .endRecord()
 
-  "Executor" should "work properly" in {
-    val manager = mock[OutputEnvironmentManager]
-    when(manager.isCheckpointInitiated).thenReturn(false)
-
-    val executor = new Executor(manager)
-    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
-    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
-
-    val transactionsBeforeCheckpoint = Map(
+  "Executor" should "work properly before first checkpoint" in new TestPreparation {
+    val transactions = Map(
       0l -> Seq(
         "incorrect input 1",
         "incorrect input 2"),
@@ -42,30 +35,20 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       2l -> Seq(
         "incorrect input 4"))
 
-    val transactionsAfterCheckpoint = Map(
-      3l -> Seq(
-        "incorrect input 5",
-        "incorrect input 6"),
-      4l -> Seq(
-        "incorrect input 7"),
-      5l -> Seq(
-        "incorrect input 8",
-        "incorrect input 9"))
-
-    transactionsBeforeCheckpoint.foreach {
+    transactions.foreach {
       case (_, transaction) =>
         engineSimulator.prepare(transaction.map(createRecord))
     }
 
-    val queriesBeforeCheckpoint = engineSimulator.process()
+    val queries = engineSimulator.process()
 
-    val expectedQueriesBeforeCheckpoint = transactionsBeforeCheckpoint.toSeq.flatMap {
+    val expectedQueriesData = transactions.toSeq.flatMap {
       case (transactionId, content) =>
         transactionId +: content.map(line => (transactionId, line))
     }
-    queriesBeforeCheckpoint.length shouldBe expectedQueriesBeforeCheckpoint.size
+    queries.length shouldBe expectedQueriesData.length
 
-    expectedQueriesBeforeCheckpoint.zip(queriesBeforeCheckpoint).foreach {
+    expectedQueriesData.zip(queries).foreach {
       case (transactionId: Long, statement) =>
         val expectedQuery = deletionQueryPrefix + transactionId
         statement.getQuery shouldBe expectedQuery
@@ -76,28 +59,48 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
       case _ => throw new IllegalStateException
     }
+  }
 
-
+  it should "work properly after first checkpoint" in new TestPreparation {
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
-    transactionsAfterCheckpoint.foreach {
+    val transactions = Map(
+      0l -> Seq(
+        "incorrect input 5",
+        "incorrect input 6"),
+      1l -> Seq(
+        "incorrect input 7"),
+      2l -> Seq(
+        "incorrect input 8",
+        "incorrect input 9"))
+
+    transactions.foreach {
       case (_, transaction) => engineSimulator.prepare(transaction.map(createRecord))
     }
 
-    val queriesAfterCheckpoint = engineSimulator.process()
+    val queries = engineSimulator.process()
 
-    val expectedQueriesAfterCheckpoint = transactionsAfterCheckpoint.toSeq.flatMap {
+    val expectedQueriesData = transactions.toSeq.flatMap {
       case (transactionId, transaction) =>
         transaction.map(line => (transactionId, line))
     }
-    queriesAfterCheckpoint.length shouldBe expectedQueriesAfterCheckpoint.size
+    queries.length shouldBe expectedQueriesData.length
 
-    expectedQueriesAfterCheckpoint.zip(queriesAfterCheckpoint).foreach {
+    expectedQueriesData.zip(queries).foreach {
       case ((transactionId, line), statement) =>
         val expectedQueryRegex = createInsertionRegex(transactionId, line)
         statement.getQuery should include regex expectedQueryRegex
     }
+  }
+
+  trait TestPreparation {
+    val manager = mock[OutputEnvironmentManager]
+    when(manager.isCheckpointInitiated).thenReturn(false)
+
+    val executor = new Executor(manager)
+    val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+    val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
   }
 
   def createInsertionRegex(transactionId: Long, line: String): String =
