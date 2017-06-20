@@ -22,26 +22,21 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     s"\\($idField,$srcIpField,$trafficField,$transactionField\\) VALUES \\('[-0-9a-f]*',"
 
   "Executor" should "work properly before first checkpoint" in new TestPreparation {
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         SrcIp("11.11.11.11", 1000),
         SrcIp("22.22.22.22", 2000)),
-      1l -> Seq(
+      Seq(
         SrcIp("33.33.33.33", 3000)),
-      2l -> Seq(
+      Seq(
         SrcIp("44.44.44.44", 4000)))
 
-
-    transactions.foreach {
-      case (_, transaction) => engineSimulator.prepare(transaction)
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction)
+      transactionId +: transaction.map(srcIp => (transactionId, srcIp))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, transaction) =>
-        transactionId +: transaction.map(srcIp => (transactionId, srcIp))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {
@@ -61,26 +56,22 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         SrcIp("55.55.55.55", 5000),
         SrcIp("66.66.66.66", 6000)),
-      1l -> Seq(
+      Seq(
         SrcIp("77.77.77.77", 7000)),
-      2l -> Seq(
+      Seq(
         SrcIp("88.88.88.88", 8000),
         SrcIp("99.99.99.99", 9000)))
 
-    transactions.foreach {
-      case (_, transaction) => engineSimulator.prepare(transaction)
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction)
+      transaction.map(srcIp => (transactionId, srcIp))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, transaction) =>
-        transaction.map(srcIp => (transactionId, srcIp))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {

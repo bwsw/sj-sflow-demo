@@ -26,26 +26,21 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     .endRecord()
 
   "Executor" should "work properly before first checkpoint" in new TestPreparation {
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         "incorrect input 1",
         "incorrect input 2"),
-      1l -> Seq(
+      Seq(
         "incorrect input 3"),
-      2l -> Seq(
+      Seq(
         "incorrect input 4"))
 
-    transactions.foreach {
-      case (_, transaction) =>
-        engineSimulator.prepare(transaction.map(createRecord))
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction.map(createRecord))
+      transactionId +: transaction.map(line => (transactionId, line))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, content) =>
-        transactionId +: content.map(line => (transactionId, line))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {
@@ -65,26 +60,22 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         "incorrect input 5",
         "incorrect input 6"),
-      1l -> Seq(
+      Seq(
         "incorrect input 7"),
-      2l -> Seq(
+      Seq(
         "incorrect input 8",
         "incorrect input 9"))
 
-    transactions.foreach {
-      case (_, transaction) => engineSimulator.prepare(transaction.map(createRecord))
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction.map(createRecord))
+      transaction.map(line => (transactionId, line))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, transaction) =>
-        transaction.map(line => (transactionId, line))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {

@@ -22,25 +22,21 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     s"\\($idField,$srcAsField,$dstAsField,$trafficField,$transactionField\\) VALUES \\('[-0-9a-f]*',"
 
   "Executor" should "work properly before first checkpoint" in new TestPreparation {
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         SrcDstAs(10, 100, 1000),
         SrcDstAs(20, 200, 2000)),
-      1l -> Seq(
+      Seq(
         SrcDstAs(30, 300, 3000)),
-      2l -> Seq(
+      Seq(
         SrcDstAs(40, 400, 4000)))
 
-    transactions.foreach {
-      case (_, transaction) => engineSimulator.prepare(transaction)
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction)
+      transactionId +: transaction.map(srcDstAs => (transactionId, srcDstAs))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, transaction) =>
-        transactionId +: transaction.map(srcDstAs => (transactionId, srcDstAs))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {
@@ -60,26 +56,22 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     // "perform" first checkpoint
     engineSimulator.wasFirstCheckpoint = true
 
-    val transactions = Map(
-      0l -> Seq(
+    val transactions = Seq(
+      Seq(
         SrcDstAs(50, 500, 5000),
         SrcDstAs(60, 600, 6000)),
-      1l -> Seq(
+      Seq(
         SrcDstAs(70, 700, 7000)),
-      2l -> Seq(
+      Seq(
         SrcDstAs(80, 800, 8000),
         SrcDstAs(90, 900, 9000)))
 
-    transactions.foreach {
-      case (_, transaction) => engineSimulator.prepare(transaction)
+    val expectedQueriesData = transactions.flatMap { transaction =>
+      val transactionId = engineSimulator.prepare(transaction)
+      transaction.map(srcDstAs => (transactionId, srcDstAs))
     }
 
     val queries = engineSimulator.process()
-
-    val expectedQueriesData = transactions.toSeq.flatMap {
-      case (transactionId, transaction) =>
-        transaction.map(srcDstAs => (transactionId, srcDstAs))
-    }
     queries.length shouldBe expectedQueriesData.length
 
     expectedQueriesData.zip(queries).foreach {

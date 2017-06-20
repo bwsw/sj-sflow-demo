@@ -27,7 +27,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onInit() = {
     logger.debug("Invoked onInit.")
-    if (!state.isExist(stateField) || !state.get(stateField).isInstanceOf[Iterable[SflowRecord]])
+    if (!state.isExist(stateField) || !state.get(stateField).isInstanceOf[Iterable[_]])
       state.set(stateField, Iterable[SflowRecord]())
   }
 
