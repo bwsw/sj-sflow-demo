@@ -1,6 +1,8 @@
 package com.bwsw.sj.examples.sflow.module.output.srcip
 
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
+import com.bwsw.sj.engine.core.simulation.mock.jdbc.{JdbcClientMock, PreparedStatementMock}
 import com.bwsw.sj.engine.core.simulation.{JdbcRequestBuilder, OutputEngineSimulator}
 import com.bwsw.sj.examples.sflow.common.JdbcFieldsNames.{idField, srcIpField, trafficField}
 import com.bwsw.sj.examples.sflow.common.SrcIp
@@ -17,14 +19,16 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
   val transactionField = "txn"
   val table = "output"
-  val deletionQueryPrefix = s"DELETE FROM $table WHERE $transactionField = "
-  val insertionQueryRegexPrefix = s"INSERT INTO $table " +
-    s"\\($idField,$srcIpField,$trafficField,$transactionField\\) VALUES \\('[-0-9a-f]*',"
 
   val manager = mock[OutputEnvironmentManager]
   when(manager.isCheckpointInitiated).thenReturn(false)
   val executor = new Executor(manager)
   val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+
+  val jdbcClient = new JdbcClientMock(table)
+  val commandBuilder = new JdbcCommandBuilder(jdbcClient, transactionField, executor.getOutputEntity)
+  val idFieldIndex = 1
+  val dataId = "data id"
 
   "Executor" should "work properly before first checkpoint" in {
     val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
@@ -37,25 +41,24 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       Seq(
         SrcIp("44.44.44.44", 4000)))
 
-    val expectedQueriesData = transactions.flatMap { transaction =>
+    val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction)
-      transactionId +: transaction.map(srcIp => (transactionId, srcIp))
+
+      val deletionStatement = commandBuilder.buildDelete(transactionId)
+      val insertionStatements = transaction.map { srcDstAs =>
+        commandBuilder.buildInsert(transactionId, createFieldsMap(srcDstAs))
+      }
+
+      deletionStatement +: insertionStatements
     }
 
-    val queries = engineSimulator.process()
-    queries.length shouldBe expectedQueriesData.length
-
-    expectedQueriesData.zip(queries).foreach {
-      case (transactionId: Long, statement) =>
-        val expectedQuery = deletionQueryPrefix + transactionId
-        statement.getQuery shouldBe expectedQuery
-
-      case ((transactionId: Long, srcIp: SrcIp), statement) =>
-        val expectedQueryRegex = createInsertionRegex(transactionId, srcIp)
-        statement.getQuery should fullyMatch regex expectedQueryRegex
-
-      case _ => throw new IllegalStateException
+    val preparedStatements = engineSimulator.process()
+    preparedStatements.foreach { preparedStatement =>
+      if (!preparedStatement.getQuery.startsWith("DELETE"))
+        preparedStatement.setString(idFieldIndex, dataId)
     }
+
+    preparedStatements shouldBe expectedPreparedStatements
   }
 
   it should "work properly after first checkpoint" in {
@@ -73,21 +76,26 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
         SrcIp("88.88.88.88", 8000),
         SrcIp("99.99.99.99", 9000)))
 
-    val expectedQueriesData = transactions.flatMap { transaction =>
+    val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction)
-      transaction.map(srcIp => (transactionId, srcIp))
+
+      transaction.map { srcDstAs =>
+        commandBuilder.buildInsert(transactionId, createFieldsMap(srcDstAs))
+      }
     }
 
-    val queries = engineSimulator.process()
-    queries.length shouldBe expectedQueriesData.length
-
-    expectedQueriesData.zip(queries).foreach {
-      case ((transactionId, srcIp), statement) =>
-        val expectedQueryRegex = createInsertionRegex(transactionId, srcIp)
-        statement.getQuery should include regex expectedQueryRegex
+    val preparedStatements = engineSimulator.process()
+    preparedStatements.foreach { preparedStatement =>
+      preparedStatement.setString(idFieldIndex, dataId)
     }
+
+    preparedStatements shouldBe expectedPreparedStatements
   }
 
-  def createInsertionRegex(transactionId: Long, srcIp: SrcIp): String =
-    insertionQueryRegexPrefix + s"'${srcIp.srcIP}',${srcIp.traffic},$transactionId\\)"
+  def createFieldsMap(srcIp: SrcIp): Map[String, Any] = {
+    Map(
+      idField -> dataId,
+      srcIpField -> srcIp.srcIP,
+      trafficField -> srcIp.traffic)
+  }
 }

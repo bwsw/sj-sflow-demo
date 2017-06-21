@@ -1,6 +1,8 @@
 package com.bwsw.sj.examples.sflow.module.output.fallback
 
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
+import com.bwsw.sj.engine.core.simulation.mock.jdbc.JdbcClientMock
 import com.bwsw.sj.engine.core.simulation.{JdbcRequestBuilder, OutputEngineSimulator}
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
@@ -17,8 +19,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val transactionField = "txn"
   val table = "output"
-  val deletionQueryPrefix = s"DELETE FROM $table WHERE $transactionField = "
-  val insertionQueryRegexPrefix = s"INSERT INTO $table \\(id,line,$transactionField\\) VALUES \\('[-0-9a-f]*',"
+
   val recordField = "data"
   val schema = SchemaBuilder.record("fallback").fields()
     .name(recordField).`type`().stringType().noDefault()
@@ -28,6 +29,11 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   when(manager.isCheckpointInitiated).thenReturn(false)
   val executor = new Executor(manager)
   val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
+
+  val jdbcClient = new JdbcClientMock(table)
+  val commandBuilder = new JdbcCommandBuilder(jdbcClient, transactionField, executor.getOutputEntity)
+  val idFieldIndex = 1
+  val dataId = "data id"
 
   "Executor" should "work properly before first checkpoint" in {
     val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
@@ -41,25 +47,24 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       Seq(
         "incorrect input 4"))
 
-    val expectedQueriesData = transactions.flatMap { transaction =>
+    val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction.map(createRecord))
-      transactionId +: transaction.map(line => (transactionId, line))
+
+      val deletionStatement = commandBuilder.buildDelete(transactionId)
+      val insertionStatements = transaction.map { line =>
+        commandBuilder.buildInsert(transactionId, createFieldsMap(line))
+      }
+
+      deletionStatement +: insertionStatements
     }
 
-    val queries = engineSimulator.process()
-    queries.length shouldBe expectedQueriesData.length
-
-    expectedQueriesData.zip(queries).foreach {
-      case (transactionId: Long, statement) =>
-        val expectedQuery = deletionQueryPrefix + transactionId
-        statement.getQuery shouldBe expectedQuery
-
-      case ((transactionId: Long, line: String), statement) =>
-        val expectedQueryRegex = createInsertionRegex(transactionId, line)
-        statement.getQuery should include regex expectedQueryRegex
-
-      case _ => throw new IllegalStateException
+    val preparedStatements = engineSimulator.process()
+    preparedStatements.foreach { preparedStatement =>
+      if (!preparedStatement.getQuery.startsWith("DELETE"))
+        preparedStatement.setString(idFieldIndex, dataId)
     }
+
+    preparedStatements shouldBe expectedPreparedStatements
   }
 
   it should "work properly after first checkpoint" in {
@@ -77,27 +82,31 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
         "incorrect input 8",
         "incorrect input 9"))
 
-    val expectedQueriesData = transactions.flatMap { transaction =>
+    val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction.map(createRecord))
-      transaction.map(line => (transactionId, line))
+
+      transaction.map { line =>
+        commandBuilder.buildInsert(transactionId, createFieldsMap(line))
+      }
     }
 
-    val queries = engineSimulator.process()
-    queries.length shouldBe expectedQueriesData.length
-
-    expectedQueriesData.zip(queries).foreach {
-      case ((transactionId, line), statement) =>
-        val expectedQueryRegex = createInsertionRegex(transactionId, line)
-        statement.getQuery should include regex expectedQueryRegex
+    val preparedStatements = engineSimulator.process()
+    preparedStatements.foreach { preparedStatement =>
+      preparedStatement.setString(idFieldIndex, dataId)
     }
+
+    preparedStatements shouldBe expectedPreparedStatements
   }
-
-  def createInsertionRegex(transactionId: Long, line: String): String =
-    insertionQueryRegexPrefix + s"'$line',$transactionId\\)"
 
   def createRecord(line: String): Record = {
     val record = new Record(schema)
     record.put(recordField, new Utf8(line))
     record
+  }
+
+  def createFieldsMap(line: String): Map[String, String] = {
+    Map(
+      "id" -> dataId,
+      "line" -> line)
   }
 }
