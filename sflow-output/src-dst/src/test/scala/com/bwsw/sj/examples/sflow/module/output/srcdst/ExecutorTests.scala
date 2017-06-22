@@ -1,12 +1,13 @@
 package com.bwsw.sj.examples.sflow.module.output.srcdst
 
+import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.core.simulation.mock.jdbc.JdbcClientMock
 import com.bwsw.sj.engine.core.simulation.{JdbcRequestBuilder, OutputEngineSimulator}
 import com.bwsw.sj.examples.sflow.common.JdbcFieldsNames.{dstAsField, idField, srcAsField, trafficField}
 import com.bwsw.sj.examples.sflow.common.SrcDstAs
-import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -20,8 +21,9 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val transactionField = "txn"
   val table = "output"
 
-  val manager = mock[OutputEnvironmentManager]
-  when(manager.isCheckpointInitiated).thenReturn(false)
+  val options = "{}"
+  val outputStream = new TStreamStreamDomain("output-stream", mock[TStreamServiceDomain], 1)
+  val manager: OutputEnvironmentManager = new OutputEnvironmentManager(options, Array(outputStream))
   val executor = new Executor(manager)
   val requestBuilder = new JdbcRequestBuilder(executor.getOutputEntity, table)
 
