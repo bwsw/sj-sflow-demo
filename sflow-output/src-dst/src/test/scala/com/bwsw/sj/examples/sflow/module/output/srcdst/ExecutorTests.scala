@@ -55,8 +55,11 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
     val preparedStatements = engineSimulator.process()
     preparedStatements.foreach { preparedStatement =>
-      if (!preparedStatement.getQuery.startsWith("DELETE"))
+      if (!preparedStatement.getQuery.startsWith("DELETE")) {
+        // replace value of "id" field because it has random value and we can't validate prepared statement
+        // see com.bwsw.sj.examples.sflow.module.output.srcdst.data.SrcDstData
         preparedStatement.setString(idFieldIndex, dataId)
+      }
     }
 
     preparedStatements shouldBe expectedPreparedStatements
@@ -87,6 +90,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
     val preparedStatements = engineSimulator.process()
     preparedStatements.foreach { preparedStatement =>
+      // replace value of "id" field because it has random value and we can't validate prepared statement
+      // see com.bwsw.sj.examples.sflow.module.output.srcdst.data.SrcDstData
       preparedStatement.setString(idFieldIndex, dataId)
     }
 
