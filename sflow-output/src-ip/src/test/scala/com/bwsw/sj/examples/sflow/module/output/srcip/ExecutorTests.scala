@@ -2,7 +2,7 @@ package com.bwsw.sj.examples.sflow.module.output.srcip
 
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
-import com.bwsw.sj.engine.core.simulation.mock.jdbc.{JdbcClientMock, PreparedStatementMock}
+import com.bwsw.sj.engine.core.simulation.mock.jdbc.JdbcClientMock
 import com.bwsw.sj.engine.core.simulation.{JdbcRequestBuilder, OutputEngineSimulator}
 import com.bwsw.sj.examples.sflow.common.JdbcFieldsNames.{idField, srcIpField, trafficField}
 import com.bwsw.sj.examples.sflow.common.SrcIp
@@ -44,12 +44,12 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction)
 
-      val deletionStatement = commandBuilder.buildDelete(transactionId)
-      val insertionStatements = transaction.map { srcDstAs =>
+      val deleteStatement = commandBuilder.buildDelete(transactionId)
+      val insertStatements = transaction.map { srcDstAs =>
         commandBuilder.buildInsert(transactionId, createFieldsMap(srcDstAs))
       }
 
-      deletionStatement +: insertionStatements
+      deleteStatement +: insertStatements
     }
 
     val preparedStatements = engineSimulator.process()

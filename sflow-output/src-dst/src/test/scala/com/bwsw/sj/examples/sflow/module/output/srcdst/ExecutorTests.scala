@@ -45,12 +45,12 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     val expectedPreparedStatements = transactions.flatMap { transaction =>
       val transactionId = engineSimulator.prepare(transaction)
 
-      val deletionStatement = commandBuilder.buildDelete(transactionId)
-      val insertionStatements = transaction.map { srcDstAs =>
+      val deleteStatement = commandBuilder.buildDelete(transactionId)
+      val insertStatements = transaction.map { srcDstAs =>
         commandBuilder.buildInsert(transactionId, createFieldsMap(srcDstAs))
       }
 
-      deletionStatement +: insertionStatements
+      deleteStatement +: insertStatements
     }
 
     val preparedStatements = engineSimulator.process()
