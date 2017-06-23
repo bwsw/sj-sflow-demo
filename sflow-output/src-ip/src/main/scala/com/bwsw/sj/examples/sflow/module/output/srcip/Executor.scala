@@ -1,8 +1,8 @@
 package com.bwsw.sj.examples.sflow.module.output.srcip
 
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.common.{JdbcFieldsNames, SrcIp}
 import com.bwsw.sj.examples.sflow.module.output.srcip.data.SrcIpData
@@ -33,7 +33,6 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
 
   override def getOutputEntity = {
     new JdbcEntityBuilder()
-      .field(new JavaStringField(JdbcFieldsNames.idField))
       .field(new JavaStringField(JdbcFieldsNames.srcIpField))
       .field(new IntegerField(JdbcFieldsNames.trafficField))
       .build()

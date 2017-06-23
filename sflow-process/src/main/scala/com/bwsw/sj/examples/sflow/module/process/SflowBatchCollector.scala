@@ -3,8 +3,8 @@ package com.bwsw.sj.examples.sflow.module.process
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.Repository
-import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
+import com.bwsw.sj.common.engine.core.entities.Envelope
 
 import scala.collection.mutable
 

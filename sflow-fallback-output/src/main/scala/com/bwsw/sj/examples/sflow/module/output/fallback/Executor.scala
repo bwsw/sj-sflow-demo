@@ -1,8 +1,8 @@
 package com.bwsw.sj.examples.sflow.module.output.fallback
 
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{JavaStringField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback
 import org.apache.avro.generic.GenericRecord
@@ -27,7 +27,6 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
 
   override def getOutputEntity = {
     new JdbcEntityBuilder()
-      .field(new JavaStringField("id"))
       .field(new JavaStringField("line"))
       .build()
   }

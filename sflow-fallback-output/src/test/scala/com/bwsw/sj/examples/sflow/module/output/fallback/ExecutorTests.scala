@@ -2,7 +2,7 @@ package com.bwsw.sj.examples.sflow.module.output.fallback
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.core.simulation.output.mock.jdbc.JdbcClientMock
 import com.bwsw.sj.engine.core.simulation.output.{JdbcRequestBuilder, OutputEngineSimulator}
@@ -34,8 +34,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
   val jdbcClient = new JdbcClientMock(table)
   val commandBuilder = new JdbcCommandBuilder(jdbcClient, transactionField, executor.getOutputEntity)
-  val idFieldIndex = 1
-  val dataId = "data id"
 
   "Executor" should "work properly before first checkpoint" in {
     val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
@@ -61,14 +59,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
 
     val preparedStatements = engineSimulator.process()
-    preparedStatements.foreach { preparedStatement =>
-      if (!preparedStatement.getQuery.startsWith("DELETE")) {
-        // replace value of "id" field because it has random value and we can't validate prepared statement
-        // see com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback
-        preparedStatement.setString(idFieldIndex, dataId)
-      }
-    }
-
     preparedStatements shouldBe expectedPreparedStatements
   }
 
@@ -96,12 +86,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
 
     val preparedStatements = engineSimulator.process()
-    preparedStatements.foreach { preparedStatement =>
-      // replace value of "id" field because it has random value and we can't validate prepared statement
-      // see com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback
-      preparedStatement.setString(idFieldIndex, dataId)
-    }
-
     preparedStatements shouldBe expectedPreparedStatements
   }
 
@@ -111,9 +95,5 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     record
   }
 
-  def createFieldsMap(line: String): Map[String, String] = {
-    Map(
-      "id" -> dataId,
-      "line" -> line)
-  }
+  def createFieldsMap(line: String): Map[String, String] = Map("line" -> line)
 }

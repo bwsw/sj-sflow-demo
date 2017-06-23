@@ -4,7 +4,6 @@ package com.bwsw.sj.examples.sflow.common
   * @author Pavel Tomskikh
   */
 object JdbcFieldsNames {
-  val idField = "id"
   val srcIpField = "src_ip"
   val srcAsField = "src_as"
   val dstIpField = "dst_ip"

@@ -1,9 +1,9 @@
 package com.bwsw.sj.examples.sflow.module.output.srcdst
 
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField, JdbcEntityBuilder}
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.common.{JdbcFieldsNames, SrcDstAs}
 import com.bwsw.sj.examples.sflow.module.output.srcdst.data.SrcDstData
 import org.slf4j.LoggerFactory
@@ -34,7 +34,6 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
 
   override def getOutputEntity = {
     new JdbcEntityBuilder()
-      .field(new JavaStringField(JdbcFieldsNames.idField))
       .field(new IntegerField(JdbcFieldsNames.srcAsField))
       .field(new IntegerField(JdbcFieldsNames.dstAsField))
       .field(new IntegerField(JdbcFieldsNames.trafficField))

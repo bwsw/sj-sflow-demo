@@ -2,11 +2,11 @@ package com.bwsw.sj.examples.sflow.module.output.srcip
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.core.simulation.output.mock.jdbc.JdbcClientMock
 import com.bwsw.sj.engine.core.simulation.output.{JdbcRequestBuilder, OutputEngineSimulator}
-import com.bwsw.sj.examples.sflow.common.JdbcFieldsNames.{idField, srcIpField, trafficField}
+import com.bwsw.sj.examples.sflow.common.JdbcFieldsNames.{srcIpField, trafficField}
 import com.bwsw.sj.examples.sflow.common.SrcIp
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
@@ -29,8 +29,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
   val jdbcClient = new JdbcClientMock(table)
   val commandBuilder = new JdbcCommandBuilder(jdbcClient, transactionField, executor.getOutputEntity)
-  val idFieldIndex = 1
-  val dataId = "data id"
 
   "Executor" should "work properly before first checkpoint" in {
     val engineSimulator = new OutputEngineSimulator(executor, requestBuilder, manager)
@@ -55,14 +53,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
 
     val preparedStatements = engineSimulator.process()
-    preparedStatements.foreach { preparedStatement =>
-      if (!preparedStatement.getQuery.startsWith("DELETE")) {
-        // replace value of "id" field because it has random value and we can't validate prepared statement
-        // see com.bwsw.sj.examples.sflow.module.output.srcip.data.SrcIpData
-        preparedStatement.setString(idFieldIndex, dataId)
-      }
-    }
-
     preparedStatements shouldBe expectedPreparedStatements
   }
 
@@ -90,18 +80,11 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
 
     val preparedStatements = engineSimulator.process()
-    preparedStatements.foreach { preparedStatement =>
-      // replace value of "id" field because it has random value and we can't validate prepared statement
-      // see com.bwsw.sj.examples.sflow.module.output.srcip.data.SrcIpData
-      preparedStatement.setString(idFieldIndex, dataId)
-    }
-
     preparedStatements shouldBe expectedPreparedStatements
   }
 
   def createFieldsMap(srcIp: SrcIp): Map[String, Any] = {
     Map(
-      idField -> dataId,
       srcIpField -> srcIp.srcIP,
       trafficField -> srcIp.traffic)
   }

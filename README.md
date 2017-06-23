@@ -114,14 +114,14 @@ SQL tables for output must be created in database *sflow*. To create tables
 
 ```sql
 CREATE TABLE srcipdata (
-    id VARCHAR(255) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     src_ip VARCHAR(32),
     traffic INTEGER,
     txn BIGINT
 );
 
 CREATE TABLE srcdstdata (
-    id VARCHAR(255) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     src_as INTEGER,
     dst_as INTEGER,
     traffic INTEGER,
@@ -129,7 +129,7 @@ CREATE TABLE srcdstdata (
 );
 
 CREATE TABLE fallbackdata (
-    id VARCHAR(255) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     line VARCHAR(255),
     txn BIGINT
 );

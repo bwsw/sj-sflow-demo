@@ -1,10 +1,10 @@
 package com.bwsw.sj.examples.sflow.module.process
 
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.GeoIp
-import com.bwsw.sj.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
-import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.sj.examples.sflow.common._
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
 import org.apache.avro.generic.GenericData.Record
