@@ -25,7 +25,7 @@ class SflowBatchCollector(
   override def getBatchesToCollect() =
     countOfEnvelopesPerStream.filter(x => x._2 > 0).keys.toSeq
 
-  override def afterReceivingEnvelope(envelope: Envelope) =
+  override def afterEnvelopeReceive(envelope: Envelope) =
     increaseCounter(envelope)
 
   private def increaseCounter(envelope: Envelope) =
