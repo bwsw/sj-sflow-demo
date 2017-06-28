@@ -99,7 +99,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
   }
 
-  override def onLeave(): Unit = {
+  override def onBeforeCheckpoint(): Unit = {
     gen.clear()
     state.set(stateField, Iterable[SflowRecord]())
   }
