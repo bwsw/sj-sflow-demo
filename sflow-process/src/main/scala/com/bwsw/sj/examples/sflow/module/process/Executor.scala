@@ -25,8 +25,8 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   // val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
   // val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
   // val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
-  val srcIpStream = manager.getRoundRobinOutput("src-ip-stream", this)
-  val srcDstStream = manager.getRoundRobinOutput("src-dst-stream", this)
+  val srcIpStream = manager.getRoundRobinOutput("src-ip-stream")
+  val srcDstStream = manager.getRoundRobinOutput("src-dst-stream")
 
   val gen = new Generator()
 
