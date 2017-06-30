@@ -14,15 +14,5 @@
     "-XX:MaxMetaspaceSize=": "96m",
     "-XX:MaxDirectMemorySize=": "4m"
   },
-  "coordinationService": "zookeeper-sflow-service",
-  "inputAvroSchema": {
-    "type": "record",
-    "name": "fallback",
-    "fields": [
-      {
-        "name": "data",
-        "type": "string"
-      }
-    ]
-  }
+  "coordinationService": "zookeeper-sflow-service"
 }

@@ -1,5 +1,6 @@
 package com.bwsw.sj.examples.sflow.module.process
 
+import com.bwsw.common.AvroSerializer
 import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
@@ -7,7 +8,9 @@ import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.examples.sflow.common._
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
+import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.GenericRecord
 import org.apache.avro.util.Utf8
 import org.slf4j.LoggerFactory
 
@@ -16,10 +19,12 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
+  private val schema = createSchema
+  private val avroSerializer = new AvroSerializer(Some(schema))
 
-  //  val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
-  //  val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
-  //  val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
+  // val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
+  // val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
+  // val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
   val srcIpStream = manager.getRoundRobinOutput("src-ip-stream")
   val srcDstStream = manager.getRoundRobinOutput("src-dst-stream")
 
@@ -77,14 +82,6 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     state.set(stateField, storage ++ sflowRecords)
   }
 
-  private def tryResolve(ip: String) = {
-    try {
-      GeoIp.resolveAs(ip)
-    } catch {
-      case _: Throwable => 0
-    }
-  }
-
   override def onEnter(): Unit = {
     logger.debug("Invoked onEnter.")
     val sflowRecords = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
@@ -92,9 +89,9 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   }
 
   override def onLeaderEnter(): Unit = {
-    //    gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
-    //    gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
-    //    gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
+    // gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
+    // gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
+    // gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
     gen.SrcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
     gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
   }
@@ -104,7 +101,43 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     state.set(stateField, Iterable[SflowRecord]())
   }
 
-  object FieldsNames {
+  override def deserialize(bytes: Array[Byte]): GenericRecord = avroSerializer.deserialize(bytes)
+
+  private def tryResolve(ip: String) = {
+    try {
+      GeoIp.resolveAs(ip)
+    } catch {
+      case _: Throwable => 0
+    }
+  }
+
+  private def createSchema: Schema = {
+    SchemaBuilder.record("csv").fields()
+      .name(FieldsNames.timestamp).`type`().stringType().noDefault()
+      .name(FieldsNames.name).`type`().stringType().noDefault()
+      .name(FieldsNames.agentAddress).`type`().stringType().noDefault()
+      .name(FieldsNames.inputPort).`type`().stringType().noDefault()
+      .name(FieldsNames.outputPort).`type`().stringType().noDefault()
+      .name(FieldsNames.srcMAC).`type`().stringType().noDefault()
+      .name(FieldsNames.dstMAC).`type`().stringType().noDefault()
+      .name(FieldsNames.ethernetType).`type`().stringType().noDefault()
+      .name(FieldsNames.inVlan).`type`().stringType().noDefault()
+      .name(FieldsNames.outVlan).`type`().stringType().noDefault()
+      .name(FieldsNames.srcIP).`type`().stringType().noDefault()
+      .name(FieldsNames.dstIP).`type`().stringType().noDefault()
+      .name(FieldsNames.ipProtocol).`type`().stringType().noDefault()
+      .name(FieldsNames.ipTos).`type`().stringType().noDefault()
+      .name(FieldsNames.ipTtl).`type`().stringType().noDefault()
+      .name(FieldsNames.udpSrcPort).`type`().stringType().noDefault()
+      .name(FieldsNames.udpDstPort).`type`().stringType().noDefault()
+      .name(FieldsNames.tcpFlags).`type`().stringType().noDefault()
+      .name(FieldsNames.packetSize).`type`().stringType().noDefault()
+      .name(FieldsNames.ipSize).`type`().stringType().noDefault()
+      .name(FieldsNames.samplingRate).`type`().stringType().noDefault()
+      .endRecord()
+  }
+
+  private object FieldsNames {
     val timestamp = "timestamp"
     val name = "name"
     val agentAddress = "agentAddress"
