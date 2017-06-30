@@ -21,7 +21,7 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
   private val schema = SchemaBuilder.record("fallback").fields()
     .name(dataField).`type`().stringType().noDefault()
     .endRecord()
-  private val avroSerializer = new AvroSerializer(Some(schema))
+  private val avroSerializer = new AvroSerializer
 
   override def onMessage(envelope: TStreamEnvelope[GenericRecord]) = {
     logger.debug("Invoked onMessage.")
@@ -38,5 +38,5 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
       .build()
   }
 
-  override def deserialize(bytes: Array[Byte]): GenericRecord = avroSerializer.deserialize(bytes)
+  override def deserialize(bytes: Array[Byte]): GenericRecord = avroSerializer.deserialize(bytes, schema)
 }

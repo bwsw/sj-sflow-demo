@@ -20,13 +20,13 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
   private val schema = createSchema
-  private val avroSerializer = new AvroSerializer(Some(schema))
+  private val avroSerializer = new AvroSerializer
 
   // val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
   // val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
   // val srcAsStream = manager.getRoundRobinOutput("src-as-stream")
-  val srcIpStream = manager.getRoundRobinOutput("src-ip-stream")
-  val srcDstStream = manager.getRoundRobinOutput("src-dst-stream")
+  val srcIpStream = manager.getRoundRobinOutput("src-ip-stream", this)
+  val srcDstStream = manager.getRoundRobinOutput("src-dst-stream", this)
 
   val gen = new Generator()
 
@@ -101,7 +101,8 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     state.set(stateField, Iterable[SflowRecord]())
   }
 
-  override def deserialize(bytes: Array[Byte]): GenericRecord = avroSerializer.deserialize(bytes)
+  override def deserialize(bytes: Array[Byte]): GenericRecord =
+    avroSerializer.deserialize(bytes, schema)
 
   private def tryResolve(ip: String) = {
     try {
