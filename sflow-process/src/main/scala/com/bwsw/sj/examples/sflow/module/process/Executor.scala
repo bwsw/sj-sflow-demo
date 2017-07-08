@@ -137,29 +137,28 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
       .name(FieldsNames.samplingRate).`type`().stringType().noDefault()
       .endRecord()
   }
+}
 
-  private object FieldsNames {
-    val timestamp = "timestamp"
-    val name = "name"
-    val agentAddress = "agentAddress"
-    val inputPort = "inputPort"
-    val outputPort = "outputPort"
-    val srcMAC = "srcMAC"
-    val dstMAC = "dstMAC"
-    val ethernetType = "ethernetType"
-    val inVlan = "inVlan"
-    val outVlan = "outVlan"
-    val srcIP = "srcIP"
-    val dstIP = "dstIP"
-    val ipProtocol = "ipProtocol"
-    val ipTos = "ipTos"
-    val ipTtl = "ipTtl"
-    val udpSrcPort = "udpSrcPort"
-    val udpDstPort = "udpDstPort"
-    val tcpFlags = "tcpFlags"
-    val packetSize = "packetSize"
-    val ipSize = "ipSize"
-    val samplingRate = "samplingRate"
-  }
-
+object FieldsNames {
+  val timestamp = "timestamp"
+  val name = "name"
+  val agentAddress = "agentAddress"
+  val inputPort = "inputPort"
+  val outputPort = "outputPort"
+  val srcMAC = "srcMAC"
+  val dstMAC = "dstMAC"
+  val ethernetType = "ethernetType"
+  val inVlan = "inVlan"
+  val outVlan = "outVlan"
+  val srcIP = "srcIP"
+  val dstIP = "dstIP"
+  val ipProtocol = "ipProtocol"
+  val ipTos = "ipTos"
+  val ipTtl = "ipTtl"
+  val udpSrcPort = "udpSrcPort"
+  val udpDstPort = "udpDstPort"
+  val tcpFlags = "tcpFlags"
+  val packetSize = "packetSize"
+  val ipSize = "ipSize"
+  val samplingRate = "samplingRate"
 }
