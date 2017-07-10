@@ -1,17 +1,20 @@
 package com.bwsw.sj.examples.sflow.module.process
 
-import com.bwsw.common.AvroSerializer
+import java.io.File
+
+import com.bwsw.common.{AvroSerializer, JsonSerializer}
 import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.examples.sflow.common._
+import com.bwsw.sj.examples.sflow.module.process.OptionsLiterals._
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
-import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.util.Utf8
+import org.apache.avro.{Schema, SchemaBuilder}
 import org.slf4j.LoggerFactory
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
@@ -21,6 +24,8 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val stateField = "sflowRecords"
   private val schema = createSchema
   private val avroSerializer = new AvroSerializer
+  private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
+  private val geoIp = createGeoIp
 
   // val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
   // val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
@@ -106,7 +111,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   private def tryResolve(ip: String) = {
     try {
-      GeoIp.resolveAs(ip)
+      geoIp.resolveAs(ip)
     } catch {
       case _: Throwable => 0
     }
@@ -136,6 +141,20 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
       .name(FieldsNames.ipSize).`type`().stringType().noDefault()
       .name(FieldsNames.samplingRate).`type`().stringType().noDefault()
       .endRecord()
+  }
+
+  private def createGeoIp: GeoIp = {
+    val optionsMap = jsonSerializer.deserialize[Map[String, String]](manager.options)
+
+    def getFile(fieldName: String): Option[File] = {
+      optionsMap.get(fieldName).filter(_.length > 0)
+        .map(name => manager.getFileStorage.get(name, name))
+    }
+
+    val ipv4DatabaseFile = getFile(ipv4DatField)
+    val ipv6DatabaseFile = getFile(ipv6DatField)
+
+    new GeoIp(ipv4DatabaseFile, ipv6DatabaseFile)
   }
 }
 

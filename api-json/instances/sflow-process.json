@@ -22,5 +22,8 @@
     "-XX:MaxDirectMemorySize=": "4m"
   },
   "eventWaitTime": 1000,
-  "coordinationService": "zookeeper-sflow-service"
+  "coordinationService": "zookeeper-sflow-service",
+  "options": {
+    "ipv4-dat": "GeoIPASNum.dat"
+  }
 }
