@@ -26,6 +26,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   private val avroSerializer = new AvroSerializer
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
   private val geoIp = createGeoIp
+  private var needSlideWindow = false
 
   // val dstAsStream = manager.getRoundRobinOutput("dst-as-stream")
   // val dstIpStream = manager.getRoundRobinOutput("dst-ip-stream")
@@ -35,7 +36,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   val gen = new Generator()
 
-  override def onInit() = {
+  override def onInit(): Unit = {
     logger.debug("Invoked onInit.")
     if (!state.isExist(stateField) || !state.get(stateField).isInstanceOf[Iterable[_]])
       state.set(stateField, Iterable[SflowRecord]())
@@ -46,7 +47,18 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     val storage = state.get(stateField).asInstanceOf[Iterable[SflowRecord]]
     val allWindows = windowRepository.getAll()
 
-    val envelopes = allWindows.flatMap(_._2.batches).flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Record]])
+    val allBatches = allWindows.flatMap {
+      case (_, window) =>
+
+        if (needSlideWindow)
+          window.batches.takeRight(windowRepository.slidingInterval)
+        else {
+          needSlideWindow = true
+          window.batches
+        }
+    }
+
+    val envelopes = allBatches.flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Record]])
     val sflowRecords = envelopes.flatMap(_.data.map { avroRecord =>
       try {
         val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[Utf8].toString
