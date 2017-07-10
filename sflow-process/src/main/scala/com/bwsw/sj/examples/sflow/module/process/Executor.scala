@@ -148,7 +148,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
     def getFile(fieldName: String): Option[File] = {
       optionsMap.get(fieldName).filter(_.length > 0)
-        .map(name => manager.getFileStorage.get(name, name))
+        .map(name => manager.fileStorage.get(name, name))
     }
 
     val ipv4DatabaseFile = getFile(ipv4DatField)
