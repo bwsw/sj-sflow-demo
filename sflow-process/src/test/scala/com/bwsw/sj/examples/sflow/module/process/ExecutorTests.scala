@@ -145,7 +145,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       createSflowRecord("20.20.20.20", "25.25.25.25", 20, 205)))
 
 
-  "Executor" should "work properly" in new Simulator {
+  "Executor" should "handle correct records properly" in new Simulator {
     val window = 6
     val slidingInterval = 3
 
@@ -157,8 +157,56 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     val expected = buildExpectedResult(transactions, window, slidingInterval)
 
     sortResult(results.simulationResult) shouldBe sortResult(expected.simulationResult)
+    results.remainingEnvelopes.map(envelopeToTuple) shouldBe expected.remainingEnvelopes.map(envelopeToTuple)
+  }
 
-    results.remainingEnvelopes.map(envelopeToTuple) shouldBe results.remainingEnvelopes.map(envelopeToTuple)
+  it should "not handle incorrect records" in new Simulator {
+    val wrongSchema = SchemaBuilder.record("wrongRecord").fields()
+      .name(FieldsNames.dstIP).`type`().intType().noDefault().endRecord()
+
+    def wrongRecord(dstIP: Int): Record = {
+      val record = new Record(wrongSchema)
+      record.put(FieldsNames.dstIP, dstIP)
+
+      record
+    }
+
+    val wrongData = Seq(
+      Seq(
+        wrongRecord(1),
+        wrongRecord(2)),
+      Seq(
+        wrongRecord(3),
+        wrongRecord(4)),
+      Seq(
+        wrongRecord(5),
+        wrongRecord(6)),
+      Seq(
+        wrongRecord(7),
+        wrongRecord(8)),
+      Seq(
+        wrongRecord(9),
+        wrongRecord(10)),
+      Seq(
+        wrongRecord(11),
+        wrongRecord(12)),
+      Seq(
+        wrongRecord(13),
+        wrongRecord(14)))
+
+    val window = 4
+    val slidingInterval = 2
+    simulator.prepareState(initialState)
+
+    val transactions = wrongData.map(records =>
+      (simulator.prepareTstream(records, inputStream.name), records))
+
+    val results = simulator.process(window = window, slidingInterval = slidingInterval)
+    val expectedRemainingEnvelopes = transactions.takeRight(
+      countRemainingEnvelopes(transactions.length, window, slidingInterval)).map(buildEnvelope)
+
+    results.simulationResult shouldBe SimulationResult(Seq.empty, initialState)
+    results.remainingEnvelopes.map(envelopeToTuple) shouldBe expectedRemainingEnvelopes.map(envelopeToTuple)
   }
 
 
@@ -214,16 +262,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
         srcDstList ++= a._2
         inner(transactions.drop(window))
       } else transactions
-    }.map {
-      case (id, sflowRecords) =>
-        val envelope = new TStreamEnvelope(
-          mutable.Queue(sflowRecords.map(sflowToAvro): _*),
-          SimulatorConstants.defaultConsumerName)
-        envelope.id = id
-        envelope.stream = inputStream.name
-
-        envelope
-    }
+    }.map(x => (x._1, x._2.map(sflowToAvro))).map(buildEnvelope)
 
     BatchSimulationResult(
       SimulationResult(
@@ -245,6 +284,26 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     }
 
     (srcIpMap.map(SrcIp(_)), srcDstMap.map(SrcDstAs(_)))
+  }
+
+  def buildEnvelope(transaction: (Long, Seq[Record])): TStreamEnvelope[Record] = {
+    transaction match {
+      case (id, records) =>
+        val envelope = new TStreamEnvelope(
+          mutable.Queue(records: _*),
+          SimulatorConstants.defaultConsumerName)
+        envelope.id = id
+        envelope.stream = inputStream.name
+
+        envelope
+    }
+  }
+
+  def countRemainingEnvelopes(envelopes: Int, window: Int, slidingInterval: Int): Int = {
+    if (envelopes >= window)
+      (envelopes - window) % slidingInterval
+    else
+      envelopes
   }
 
 
