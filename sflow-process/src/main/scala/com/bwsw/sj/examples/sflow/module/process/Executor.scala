@@ -17,6 +17,8 @@ import org.apache.avro.util.Utf8
 import org.apache.avro.{Schema, SchemaBuilder}
 import org.slf4j.LoggerFactory
 
+import scala.util.Try
+
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -60,7 +62,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
     val envelopes = allBatches.flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Record]])
     val sflowRecords = envelopes.flatMap(_.data.map { avroRecord =>
-      try {
+      val triedSflowRecord = Try {
         val _srcIP = avroRecord.get(FieldsNames.srcIP).asInstanceOf[Utf8].toString
         val _dstIP = avroRecord.get(FieldsNames.dstIP).asInstanceOf[Utf8].toString
         SflowRecord(
@@ -87,12 +89,13 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
           samplingRate = avroRecord.get(FieldsNames.samplingRate).asInstanceOf[Utf8].toString.toInt,
           srcAs = tryResolve(_srcIP),
           dstAs = tryResolve(_dstIP))
-      } catch {
-        case _: Throwable =>
-          logger.debug(s"Incorrect record.")
-          null
       }
-    }).filter(_ != null)
+
+      if (triedSflowRecord.isFailure)
+        logger.debug(s"Incorrect record $avroRecord")
+
+      triedSflowRecord
+    }).filter(_.isSuccess).map(_.get)
 
     logger.debug(s"Sflow records: ${sflowRecords.mkString(", ")}.")
 
@@ -106,6 +109,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   }
 
   override def onLeaderEnter(): Unit = {
+    logger.debug("Invoked onLeaderEnter.")
     // gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
     // gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
     // gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
@@ -114,6 +118,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   }
 
   override def onBeforeCheckpoint(): Unit = {
+    logger.debug("Invoked onBeforeCheckpoint.")
     gen.clear()
     state.set(stateField, Iterable[SflowRecord]())
   }
@@ -121,13 +126,8 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   override def deserialize(bytes: Array[Byte]): GenericRecord =
     avroSerializer.deserialize(bytes, schema)
 
-  private def tryResolve(ip: String) = {
-    try {
-      geoIp.resolveAs(ip)
-    } catch {
-      case _: Throwable => 0
-    }
-  }
+  private def tryResolve(ip: String) =
+    Try(geoIp.resolveAs(ip)).getOrElse(0)
 
   private def createSchema: Schema = {
     SchemaBuilder.record("csv").fields()
