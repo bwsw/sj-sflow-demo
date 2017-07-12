@@ -145,7 +145,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
       createSflowRecord("20.20.20.20", "25.25.25.25", 20, 205)))
 
 
-  "Executor" should "handle correct records properly" in new Simulator {
+  "Executor" should "properly process the correct records" in new Simulator {
     val window = 6
     val slidingInterval = 3
 
@@ -160,7 +160,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     results.remainingEnvelopes shouldBe expected.remainingEnvelopes
   }
 
-  it should "not handle incorrect records" in new Simulator {
+  it should "not fail with the incorrect records" in new Simulator {
     val wrongSchema = SchemaBuilder.record("wrongRecord").fields()
       .name(FieldsNames.dstIP).`type`().intType().noDefault().endRecord()
 
