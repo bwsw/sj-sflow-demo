@@ -26,7 +26,7 @@ import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
-import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.state.{RAMStateService, StateSaver, StateStorage}
 import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants
@@ -157,7 +157,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     val expected = buildExpectedResult(transactions, window, slidingInterval)
 
     sortResult(results.simulationResult) shouldBe sortResult(expected.simulationResult)
-    results.remainingEnvelopes.map(envelopeToTuple) shouldBe expected.remainingEnvelopes.map(envelopeToTuple)
+    results.remainingEnvelopes shouldBe expected.remainingEnvelopes
   }
 
   it should "not handle incorrect records" in new Simulator {
@@ -204,9 +204,9 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     val results = simulator.process(window = window, slidingInterval = slidingInterval)
     val expectedRemainingEnvelopes = transactions.takeRight(
       countRemainingEnvelopes(transactions.length, window, slidingInterval)).map(buildEnvelope)
+    val expectedResults = BatchSimulationResult(SimulationResult(Seq.empty, initialState), expectedRemainingEnvelopes)
 
-    results.simulationResult shouldBe SimulationResult(Seq.empty, initialState)
-    results.remainingEnvelopes.map(envelopeToTuple) shouldBe expectedRemainingEnvelopes.map(envelopeToTuple)
+    results shouldBe expectedResults
   }
 
 
@@ -229,13 +229,6 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
           })
       }.sortBy(_.stream),
       result.state)
-  }
-
-  def envelopeToTuple(envelope: Envelope): (Long, String, Int, List[_ <: AnyRef]) = envelope match {
-    case e: TStreamEnvelope[_] =>
-      (e.id, e.stream, e.partition, e.data.toList)
-    case _ =>
-      throw new IllegalStateException("incorrect envelope type")
   }
 
   def buildExpectedResult(transactions: Seq[(Long, Seq[SflowRecord])],
