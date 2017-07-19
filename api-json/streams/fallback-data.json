@@ -8,5 +8,5 @@
     "fallback"
   ],
   "primary": "id",
-  "type": "jdbc-output"
+  "type": "stream.sql-database"
 }

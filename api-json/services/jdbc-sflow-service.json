@@ -3,5 +3,5 @@
   "description": "JDBC service for demo",
   "provider": "jdbc-sflow-provider",
   "database": "sflow",
-  "type": "JDBC"
+  "type": "service.sql-database"
 }

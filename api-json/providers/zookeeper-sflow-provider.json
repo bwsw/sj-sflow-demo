@@ -1,7 +1,7 @@
 {
   "name": "zookeeper-sflow-provider",
   "description": "Zookeeper provider for demo",
-  "type": "zookeeper",
+  "type": "provider.apache-zookeeper",
   "login": "<login>",
   "password": "<password>",
   "hosts": [

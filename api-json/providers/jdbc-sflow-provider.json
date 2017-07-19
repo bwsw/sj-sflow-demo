@@ -1,7 +1,7 @@
 {
   "name": "jdbc-sflow-provider",
   "description": "JDBC provider for demo",
-  "type": "JDBC",
+  "type": "provider.sql-database",
   "login": "<login>",
   "password": "<password>",
   "hosts": [

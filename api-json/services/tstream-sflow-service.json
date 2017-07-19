@@ -1,7 +1,7 @@
 {
   "name": "tstream-sflow-service",
   "description": "Tstream service for demo",
-  "type": "TstrQ",
+  "type": "service.t-streams",
   "provider": "zookeeper-sflow-provider",
   "prefix": "/sflow",
   "token": "sflow"

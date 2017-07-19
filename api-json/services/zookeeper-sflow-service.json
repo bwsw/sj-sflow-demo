@@ -3,5 +3,5 @@
   "description": "Zookeeper service for demo",
   "provider": "zookeeper-sflow-provider",
   "namespace": "sflow",
-  "type": "ZKCoord"
+  "type": "service.apache-zookeeper"
 }

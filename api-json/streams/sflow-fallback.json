@@ -7,6 +7,6 @@
     "input",
     "fallback"
   ],
-  "type": "stream.t-stream",
+  "type": "stream.t-streams",
   "partitions": 3
 }
