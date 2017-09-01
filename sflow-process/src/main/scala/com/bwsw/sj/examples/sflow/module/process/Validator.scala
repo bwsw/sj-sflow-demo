@@ -21,9 +21,9 @@ class Validator extends StreamingValidator {
     }.exists(_.isDefined)
 
     if (atLeastOneFieldDefined)
-      ValidationInfo(result = false, ArrayBuffer(error))
-    else
       ValidationInfo(result = true)
+    else
+      ValidationInfo(result = false, ArrayBuffer(error))
   }
 }
 
