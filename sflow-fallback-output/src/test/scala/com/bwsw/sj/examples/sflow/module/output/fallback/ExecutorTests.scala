@@ -1,5 +1,7 @@
 package com.bwsw.sj.examples.sflow.module.output.fallback
 
+import java.util.Date
+
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
@@ -28,7 +30,7 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     .endRecord()
 
   val options = "{}"
-  val outputStream = new TStreamStreamDomain("output-stream", mock[TStreamServiceDomain], 1)
+  val outputStream = new TStreamStreamDomain("output-stream", mock[TStreamServiceDomain], 1, creationDate = new Date())
   val manager: OutputEnvironmentManager = new OutputEnvironmentManager(
     options,
     Array(outputStream),

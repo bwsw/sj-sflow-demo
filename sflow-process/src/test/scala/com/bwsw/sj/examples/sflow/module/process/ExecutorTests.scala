@@ -19,6 +19,7 @@
 package com.bwsw.sj.examples.sflow.module.process
 
 import java.io.File
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
@@ -70,10 +71,10 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
   val schema = createSchema
 
-  val srcIpStream = new TStreamStreamDomain(StreamNames.srcIpStream, mock[TStreamServiceDomain], 1)
-  val srcDstStream = new TStreamStreamDomain(StreamNames.srcDstStream, mock[TStreamServiceDomain], 1)
+  val srcIpStream = new TStreamStreamDomain(StreamNames.srcIpStream, mock[TStreamServiceDomain], 1, creationDate = new Date())
+  val srcDstStream = new TStreamStreamDomain(StreamNames.srcDstStream, mock[TStreamServiceDomain], 1, creationDate = new Date())
 
-  val inputStream = new TStreamStreamDomain("input-stream", mock[TStreamServiceDomain], 1)
+  val inputStream = new TStreamStreamDomain("input-stream", mock[TStreamServiceDomain], 1, creationDate = new Date())
   val batchInstance = mock[BatchInstanceDomain]
   when(batchInstance.getInputsWithoutStreamMode).thenReturn(Array(inputStream.name))
 
