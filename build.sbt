@@ -19,6 +19,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
     "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT" % "provided",
+    "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"),
 
   assemblyMergeStrategy in assembly := {
@@ -51,8 +52,8 @@ lazy val sflowDemoCommon = Project(id = "sflow-common",
 lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./sflow-process"))
   .dependsOn(sflowDemoCommon)
+  .settings(commonSettings: _*)
   .settings(
-    commonSettings,
     libraryDependencies += "com.hazelcast" % "hazelcast" % "3.7.3"
   )
 
