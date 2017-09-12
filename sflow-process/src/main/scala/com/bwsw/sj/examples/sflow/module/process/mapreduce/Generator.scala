@@ -1,12 +1,16 @@
 package com.bwsw.sj.examples.sflow.module.process.mapreduce
 
+import java.util
+import java.util.concurrent.TimeUnit
+
 import com.bwsw.sj.examples.sflow.common.SflowRecord
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.mappers._
 import com.hazelcast.config._
 import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
-import com.hazelcast.mapreduce.{JobTracker, KeyValueSource}
+import com.hazelcast.mapreduce.{JobCompletableFuture, JobTracker, KeyValueSource}
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 class Generator {
   var hazelcastMapName = "hazelcast"
@@ -22,7 +26,8 @@ class Generator {
     val source = getSource
     val job = tracker.newJob(source)
     val future = job.mapper(new SrcAsMapper()).reducer[Int](new CommonReducerFactory[Int]()).submit()
-    future.get().asScala
+
+    getResult(future)
   }
 
   def DstAsReduceResult(): collection.mutable.Map[Int, Int] = {
@@ -30,7 +35,8 @@ class Generator {
     val source = getSource
     val job = tracker.newJob(source)
     val future = job.mapper(new DstAsMapper()).reducer[Int](new CommonReducerFactory[Int]).submit()
-    future.get().asScala
+
+    getResult(future)
   }
 
   def SrcDstReduceResult(): collection.mutable.Map[Int Tuple2 Int, Int] = {
@@ -38,7 +44,8 @@ class Generator {
     val source = getSource
     val job = tracker.newJob(source)
     val future = job.mapper(new SrcDstAsMapper()).reducer[Int](new CommonReducerFactory[Int Tuple2 Int]).submit()
-    future.get().asScala
+
+    getResult(future)
   }
 
   def SrcIpReduceResult(): collection.mutable.Map[String, Int] = {
@@ -46,7 +53,8 @@ class Generator {
     val source = getSource
     val job = tracker.newJob(source)
     val future = job.mapper(new SrcIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
-    future.get().asScala
+
+    getResult(future)
   }
 
   def DstIpReduceResult(): collection.mutable.Map[String, Int] = {
@@ -54,7 +62,8 @@ class Generator {
     val source = getSource
     val job = tracker.newJob(source)
     val future = job.mapper(new DstIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
-    future.get().asScala
+
+    getResult(future)
   }
 
   def getSource: KeyValueSource[String, SflowRecord] = {
@@ -104,4 +113,8 @@ class Generator {
   def uuid = java.util.UUID.randomUUID.toString
 
   def clear() = getMap.clear()
+
+
+  private def getResult[K, V](future: JobCompletableFuture[util.Map[K, V]]): collection.mutable.Map[K, V] =
+    Try(future.get(10, TimeUnit.SECONDS).asScala).getOrElse(collection.mutable.Map.empty)
 }
