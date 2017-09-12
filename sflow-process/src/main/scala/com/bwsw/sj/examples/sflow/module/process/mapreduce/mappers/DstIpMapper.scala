@@ -4,7 +4,6 @@ import com.bwsw.sj.examples.sflow.common.SflowRecord
 import com.hazelcast.mapreduce.{Context, Mapper}
 
 class DstIpMapper extends Mapper[String, SflowRecord, String, Int] {
-  override def map(key: String, value: SflowRecord, context: Context[String, Int]) = {
+  override def map(key: String, value: SflowRecord, context: Context[String, Int]): Unit =
     context.emit(value.dstIP, value.getTraffic)
-  }
 }

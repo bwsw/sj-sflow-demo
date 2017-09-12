@@ -1,99 +1,53 @@
 package com.bwsw.sj.examples.sflow.module.process.mapreduce
 
-import java.util
 import java.util.concurrent.TimeUnit
 
 import com.bwsw.sj.examples.sflow.common.SflowRecord
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.mappers._
 import com.hazelcast.config._
 import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
-import com.hazelcast.mapreduce.{JobCompletableFuture, JobTracker, KeyValueSource}
+import com.hazelcast.mapreduce.{JobTracker, KeyValueSource, Mapper}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.Try
 
 class Generator {
-  var hazelcastMapName = "hazelcast"
-  var trackerName = "tracker"
-  var hazelcastInstance: Option[HazelcastInstance] = None
+  private val hazelcastMapName = "hazelcast"
+  private val trackerName = "tracker"
 
-  var tracker: Option[JobTracker] = None
-  var source: Option[KeyValueSource[String, SflowRecord]] = None
+  private lazy val hazelcastInstance: HazelcastInstance = Hazelcast.newHazelcastInstance(getHazelcastConfig)
+  private lazy val tracker: JobTracker = hazelcastInstance.getJobTracker(trackerName)
+  private lazy val source: KeyValueSource[String, SflowRecord] = KeyValueSource.fromMap[String, SflowRecord](getMap)
 
 
-  def SrcAsReduceResult(): collection.mutable.Map[Int, Int] = {
-    val tracker = getTracker
-    val source = getSource
-    val job = tracker.newJob(source)
-    val future = job.mapper(new SrcAsMapper()).reducer[Int](new CommonReducerFactory[Int]()).submit()
+  def srcAsReduceResult(): mutable.Map[Int, Int] =
+    reduceResult(new SrcAsMapper(), new CommonReducerFactory[Int])
 
-    getResult(future)
+  def dstAsReduceResult(): mutable.Map[Int, Int] =
+    reduceResult(new DstAsMapper(), new CommonReducerFactory[Int])
+
+  def srcDstReduceResult(): mutable.Map[(Int, Int), Int] =
+    reduceResult(new SrcDstAsMapper(), new CommonReducerFactory[(Int, Int)])
+
+  def srcIpReduceResult(): mutable.Map[String, Int] =
+    reduceResult(new SrcIpMapper(), new CommonReducerFactory[String])
+
+  def dstIpReduceResult(): mutable.Map[String, Int] =
+    reduceResult(new DstIpMapper(), new CommonReducerFactory[String])
+
+  def putRecords(records: Iterable[SflowRecord]): Unit = {
+    val iMap: IMap[String, SflowRecord] = getMap
+    records.foreach(sflowRecord => iMap.put(uuid, sflowRecord))
   }
 
-  def DstAsReduceResult(): collection.mutable.Map[Int, Int] = {
-    val tracker = getTracker
-    val source = getSource
-    val job = tracker.newJob(source)
-    val future = job.mapper(new DstAsMapper()).reducer[Int](new CommonReducerFactory[Int]).submit()
-
-    getResult(future)
-  }
-
-  def SrcDstReduceResult(): collection.mutable.Map[Int Tuple2 Int, Int] = {
-    val tracker = getTracker
-    val source = getSource
-    val job = tracker.newJob(source)
-    val future = job.mapper(new SrcDstAsMapper()).reducer[Int](new CommonReducerFactory[Int Tuple2 Int]).submit()
-
-    getResult(future)
-  }
-
-  def SrcIpReduceResult(): collection.mutable.Map[String, Int] = {
-    val tracker = getTracker
-    val source = getSource
-    val job = tracker.newJob(source)
-    val future = job.mapper(new SrcIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
-
-    getResult(future)
-  }
-
-  def DstIpReduceResult(): collection.mutable.Map[String, Int] = {
-    val tracker = getTracker
-    val source = getSource
-    val job = tracker.newJob(source)
-    val future = job.mapper(new DstIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
-
-    getResult(future)
-  }
-
-  def getSource: KeyValueSource[String, SflowRecord] = {
-    if (source.isEmpty) source = Some(KeyValueSource.fromMap[String, SflowRecord](getMap))
-    source.get
-  }
-
-  def getTracker: JobTracker = {
-    if (tracker.isEmpty) tracker = Some(getHazelcastInstance.getJobTracker(trackerName))
-    tracker.get
-  }
-
-  def putRecords(records: Iterable[SflowRecord]) = {
-    val imap: IMap[String, SflowRecord] = getHazelcastInstance.getMap[String, SflowRecord](hazelcastMapName)
-    records.foreach(sflowRecord => imap.put(uuid, sflowRecord))
-  }
-
-  def getMap: IMap[String, SflowRecord] =
-    getHazelcastInstance.getMap[String, SflowRecord](hazelcastMapName)
-
-  def setHazelcastMapName(mapName: String) =
-    hazelcastMapName = mapName
+  def clear(): Unit = getMap.clear()
 
 
-  def getHazelcastInstance: HazelcastInstance = {
-    if (hazelcastInstance.isEmpty) hazelcastInstance = Some(Hazelcast.newHazelcastInstance(getHazelcastConfig))
-    hazelcastInstance.get
-  }
+  private def getMap: IMap[String, SflowRecord] =
+    hazelcastInstance.getMap[String, SflowRecord](hazelcastMapName)
 
-  def getHazelcastConfig: Config = {
+  private def getHazelcastConfig: Config = {
     val config = new XmlConfigBuilder().build
 
     val tcpIpConfig = new TcpIpConfig
@@ -107,14 +61,17 @@ class Generator {
     val networkConfig = new NetworkConfig
     networkConfig.setJoin(joinConfig)
     val classLoader = getClass.getClassLoader
+
     config.setNetworkConfig(networkConfig).setClassLoader(classLoader)
   }
 
-  def uuid = java.util.UUID.randomUUID.toString
+  private def uuid: String = java.util.UUID.randomUUID.toString
 
-  def clear() = getMap.clear()
+  private def reduceResult[KeyOut](mapper: Mapper[String, SflowRecord, KeyOut, Int],
+                                   reducerFactory: CommonReducerFactory[KeyOut]): mutable.Map[KeyOut, Int] = {
+    val job = tracker.newJob(source)
+    val future = job.mapper(mapper).reducer[Int](reducerFactory).submit()
 
-
-  private def getResult[K, V](future: JobCompletableFuture[util.Map[K, V]]): collection.mutable.Map[K, V] =
-    Try(future.get(10, TimeUnit.SECONDS).asScala).getOrElse(collection.mutable.Map.empty)
+    Try(future.get(10, TimeUnit.SECONDS).asScala).getOrElse(mutable.Map.empty)
+  }
 }

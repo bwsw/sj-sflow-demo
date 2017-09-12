@@ -110,11 +110,11 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onLeaderEnter(): Unit = {
     logger.debug("Invoked onLeaderEnter.")
-    // gen.DstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
-    // gen.DstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
-    // gen.SrcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
-    gen.SrcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
-    gen.SrcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
+    // gen.dstAsReduceResult().foreach(tuple => dstAsStream.put(DstAs(tuple)))
+    // gen.dstIpReduceResult().foreach(tuple => dstIpStream.put(DstIp(tuple)))
+    // gen.srcAsReduceResult().foreach(tuple => srcAsStream.put(SrcAs(tuple)))
+    gen.srcIpReduceResult().foreach(tuple => srcIpStream.put(SrcIp(tuple)))
+    gen.srcDstReduceResult().foreach(tuple => srcDstStream.put(SrcDstAs(tuple)))
   }
 
   override def onBeforeCheckpoint(): Unit = {

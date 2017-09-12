@@ -2,15 +2,11 @@ package com.bwsw.sj.examples.sflow.module.process.mapreduce
 
 import com.hazelcast.mapreduce.Reducer
 
-
 class CommonReducer extends Reducer[Int, Int] {
-  var sum: Int = 0
+  private var sum: Int = 0
 
-  override def reduce(value: Int) = {
+  override def reduce(value: Int): Unit =
     sum += value
-  }
 
-  override def finalizeReduce(): Int = {
-    sum
-  }
+  override def finalizeReduce(): Int = sum
 }

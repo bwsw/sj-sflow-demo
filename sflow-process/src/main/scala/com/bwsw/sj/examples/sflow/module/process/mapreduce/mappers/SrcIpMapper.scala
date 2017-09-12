@@ -7,7 +7,6 @@ import com.hazelcast.mapreduce.{Context, Mapper}
   * Created by diryavkin_dn on 11.01.17.
   */
 class SrcIpMapper extends Mapper[String, SflowRecord, String, Int] {
-  override def map(key: String, value: SflowRecord, context: Context[String, Int]) = {
+  override def map(key: String, value: SflowRecord, context: Context[String, Int]): Unit =
     context.emit(value.srcIP, value.getTraffic)
-  }
 }

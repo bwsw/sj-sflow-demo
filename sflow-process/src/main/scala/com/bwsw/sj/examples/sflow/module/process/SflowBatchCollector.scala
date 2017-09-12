@@ -10,26 +10,19 @@ import scala.collection.mutable
 /**
   * @author Pavel Tomskikh
   */
-class SflowBatchCollector(
-    instance: BatchInstanceDomain,
-    performanceMetrics: BatchStreamingPerformanceMetrics,
-    inputs: Array[StreamDomain])
+class SflowBatchCollector(instance: BatchInstanceDomain,
+                          performanceMetrics: BatchStreamingPerformanceMetrics,
+                          inputs: Array[StreamDomain])
   extends BatchCollector(instance, performanceMetrics, inputs) {
 
   private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)
 
-  override def prepareForNextCollecting(streamName: String) =
-    resetCounter(streamName)
-
-  override def getBatchesToCollect() =
-    countOfEnvelopesPerStream.filter(x => x._2 > 0).keys.toSeq
-
-  override def afterEnvelopeReceive(envelope: Envelope) =
-    increaseCounter(envelope)
-
-  private def increaseCounter(envelope: Envelope) =
-    countOfEnvelopesPerStream(envelope.stream) += 1
-
-  private def resetCounter(streamName: String) =
+  override def prepareForNextCollecting(streamName: String): Unit =
     countOfEnvelopesPerStream(streamName) = 0
+
+  override def getBatchesToCollect(): Seq[String] =
+    countOfEnvelopesPerStream.filter(_._2 > 0).keys.toSeq
+
+  override def afterEnvelopeReceive(envelope: Envelope): Unit =
+    countOfEnvelopesPerStream(envelope.stream) += 1
 }

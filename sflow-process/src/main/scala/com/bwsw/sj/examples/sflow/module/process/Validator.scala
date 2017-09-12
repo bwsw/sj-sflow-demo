@@ -12,7 +12,7 @@ class Validator extends StreamingValidator {
   private val serializer = new JsonSerializer(ignoreUnknown = true)
   private val error = s"At least one of fields '$ipv4DatField', '$ipv6DatField' must be defined"
 
-  override def validate(options: String) = {
+  override def validate(options: String): ValidationInfo = {
     val optionsMap = serializer.deserialize[Map[String, String]](options)
     val fieldNames = Seq(ipv4DatField, ipv6DatField)
 
