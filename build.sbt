@@ -19,6 +19,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   libraryDependencies ++= Seq(
     "com.bwsw" %% "sj-engine-core" % "1.0-SNAPSHOT" % "provided",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"),
 

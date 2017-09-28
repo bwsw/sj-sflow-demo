@@ -11,17 +11,17 @@ import com.bwsw.sj.common.utils.GeoIp
 import com.bwsw.sj.examples.sflow.common._
 import com.bwsw.sj.examples.sflow.module.process.OptionsLiterals._
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
+import com.typesafe.scalalogging.Logger
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.util.Utf8
 import org.apache.avro.{Schema, SchemaBuilder}
-import org.slf4j.LoggerFactory
 
 import scala.util.Try
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val state: StateStorage = manager.getState
   private val stateField = "sflowRecords"
   private val schema = createSchema

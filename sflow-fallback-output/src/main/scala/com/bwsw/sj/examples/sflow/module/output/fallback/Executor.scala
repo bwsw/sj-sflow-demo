@@ -6,17 +6,17 @@ import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{JavaStringField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.module.output.fallback.data.Fallback
+import com.typesafe.scalalogging.Logger
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.util.Utf8
-import org.slf4j.LoggerFactory
 
 /**
   * @author Pavel Tomskikh
   */
 class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[GenericRecord](manager) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val dataField = "data"
   private val schema = SchemaBuilder.record("fallback").fields()
     .name(dataField).`type`().stringType().noDefault()

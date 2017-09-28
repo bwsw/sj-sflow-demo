@@ -6,14 +6,14 @@ import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField, JdbcEntityBuilder}
 import com.bwsw.sj.examples.sflow.common.{JdbcFieldsNames, SrcIp}
 import com.bwsw.sj.examples.sflow.module.output.srcip.data.SrcIpData
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
 class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[SrcIp](manager) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   /**
     * Transform t-stream transaction to output entities
