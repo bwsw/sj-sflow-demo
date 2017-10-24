@@ -15,11 +15,11 @@
   "parallelism": 1,
   "startFrom": "oldest",
   "perTaskCores": 0.1,
-  "perTaskRam": 192,
+  "perTaskRam": 1024,
   "jvmOptions": {
-    "-Xmx": "64m",
-    "-XX:MaxMetaspaceSize=": "120m",
-    "-XX:MaxDirectMemorySize=": "4m"
+    "-Xmx": "512m",
+    "-XX:MaxMetaspaceSize=": "768m",
+    "-XX:MaxDirectMemorySize=": "256m"
   },
   "eventWaitTime": 1000,
   "coordinationService": "zookeeper-sflow-service",
