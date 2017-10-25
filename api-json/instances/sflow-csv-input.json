@@ -3,11 +3,11 @@
   "description": "Input engine for sflow",
   "parallelism": 1,
   "perTaskCores": 0.1,
-  "perTaskRam": 192,
+  "perTaskRam": 1024,
   "jvmOptions": {
-    "-Xmx": "32m",
-    "-XX:MaxMetaspaceSize=": "96m",
-    "-XX:MaxDirectMemorySize=": "4m"
+    "-Xmx": "512m",
+    "-XX:MaxMetaspaceSize=": "768m",
+    "-XX:MaxDirectMemorySize=": "256m"
   },
   "coordinationService": "zookeeper-sflow-service",
   "performanceReportingInterval": 10000,
