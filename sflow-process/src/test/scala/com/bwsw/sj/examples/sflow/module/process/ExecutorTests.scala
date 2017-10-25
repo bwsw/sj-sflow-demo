@@ -212,7 +212,8 @@ class ExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
 
   trait Simulator {
-    val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(srcIpStream, srcDstStream), fileStorage)
+    val tstreamsSender = new TStreamsSenderThreadMock(Set(StreamNames.srcIpStream, StreamNames.srcDstStream))
+    val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(srcIpStream, srcDstStream), tstreamsSender, fileStorage)
     val executor = new Executor(manager)
     val batchCollector = new SflowBatchCollector(batchInstance, mock[BatchStreamingPerformanceMetrics], Array(inputStream))
     val simulator = new BatchEngineSimulator(executor, manager, batchCollector)
