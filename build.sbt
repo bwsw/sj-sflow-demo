@@ -47,6 +47,8 @@ val commonSettings = Seq(
 
 
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Elasticsearch Releases" at "https://artifacts.elastic.co/maven",
+  
   libraryDependencies ++= Dependencies.sjSflowCommonDependencies.value,
 
   assemblyMergeStrategy in assembly := {
